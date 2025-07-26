@@ -1,0 +1,90 @@
+{
+	"layer": "top",
+	"position": "top",
+	"margin-left": 5,
+	"margin-right": 5,
+	"spacing": 0,
+	"modules-left": [
+		"hyprland/workspaces",
+		"mpris"
+	],
+	"modules-center": [
+		"clock"
+	],
+	"modules-right": [
+		"tray",
+		"network",
+		"battery"
+	],
+	"hyprland/workspaces": {
+		"disable-scroll": false,
+		"all-outputs": true,
+		"format": "{id}",
+		"on-click": "activate",
+		"persistent-workspaces": {
+			"*": [
+				1,
+				2,
+				3
+			]
+		}
+	},
+	"clock": {
+		"interval": 1,
+		"format": " {:%H:%M} ",
+		"format-alt": "{:%A, %B %d, %Y (%R)}",
+		"tooltip": true,
+		"tooltip-format": "{calendar}"
+	},
+	"mpris": {
+		"format": "<small>{title} - <i>{artist}</i></small>",
+		"title-len": 25,
+		"status-icons": {
+			"paused": "⏸ ",
+			"playing": "▶"
+		}
+	},
+	"tray": {
+		"icon-size": 17,
+		"spacing": 6
+	},
+	"network": {
+		"format-wifi": " {icon}{essid} ",
+		"format-ethernet": "   Wired ",
+		"format-linked": " 󱘖 {ifname} (No IP) ",
+		"format-disconnected": " 󰤮  OFFLINE...",
+		"format-alt": "{ipaddr}/{cidr}",
+		"format-icons": [
+			"󰤯 ",
+			"󰤟 ",
+			"󰤢 ",
+			"󰤥 ",
+			"󰤨 "
+		],
+		"tooltip-format": "<span color='#FF1493'> 󰅧 </span>{bandwidthUpBytes}  <span color='#00BFFF'> 󰅢 </span>{bandwidthDownBytes}",
+		"interval": 2
+	},
+	"battery": {
+		"states": {
+			"warning": 30,
+			"critical": 15
+		},
+		"format": " {icon} {capacity}% ",
+		"format-charging": " 󱐋 {capacity}% ",
+		"format-full": " 󰂄 {capacity}% ",
+		"interval": 2,
+		"format-icons": [
+			"󰁺",
+			"󰁻",
+			"󰁼",
+			"󰁽",
+			"󰁾",
+			"󰁿",
+			"󰂀",
+			"󰂁",
+			"󰂂",
+			"󰁹"
+		],
+		"tooltip": true
+	}
+}
