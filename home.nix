@@ -8,27 +8,30 @@
     EDITOR = "nvim";
     MOZ_LEGACY_PROFILES = "1";
     NIXOS_OZONE_WL = "1";
+    ELECTRON_OZONE_PLATFORM_HINT = "wayland";
     HYPRSHOT_DIR = "~/Pictures/Screenshots";
+    AQ_DRM_DEVICES = "/dev/dri/card2";
   };
   home.shellAliases = {
     "cd" = "z";
     "nv" = "nvim";
   };
   home.packages = with pkgs; [
-    # Applications #
+    ### Applications
     firefox
     hyprshot
     hyprpicker
     hyprsysteminfo
     libreoffice-fresh
-    obsidian
     nautilus
     neovim
+    mission-center
     mullvad-vpn
+    obsidian
+    pavucontrol
     spotify
     webcord
-    # networkmanager_dmenu python313Packages.pygobject3
-    # CLI #
+    ### CLI
     dysk
     ffmpeg
     gnumake
@@ -40,15 +43,17 @@
     unzip
     sqlite
     wget
-    ### Libaries ###
+    ### Libaries
     inotify-tools
     wl-clipboard
-    ### fonts ###
+    libinput
+    libinput-gestures
+    ### fonts
     noto-fonts-color-emoji
     font-awesome
     nerd-fonts.jetbrains-mono
     nerd-fonts.caskaydia-cove
-    ### Languages ###
+    ### Languages
     gcc
     cargo
     nodejs_24
@@ -67,9 +72,24 @@
   };
 
   services = {
-    dunst.enable = true;
     hyprpaper.enable = true;
     playerctld.enable = true;
+    dunst = {
+      enable = true;
+      settings = {
+        global.corner_radius = 8;
+        urgency_low.timeout = 5;
+        urgency_normal.timeout = 5;
+      };
+    };
+    fusuma = {
+      enable = true;
+      settings = {
+        swipe."3".up.command = "swayosd-client --output-volume raise";
+        swipe."3".down.command = "swayosd-client --output-volume lower";
+        hold."3".command = "playerctl play-pause";
+      };
+    };
     udiskie = {
       enable = true;
       settings.program_options.file_manager = "nautilus";
@@ -93,7 +113,6 @@
         height = "50%";
       };
     };
-    ghostty.enable = true;
     btop = {
       enable = true;
       extraConfig = ''
@@ -107,6 +126,22 @@
     fzf = {
       enable = true;
       defaultOptions = [ "--info=inline-right" "--ansi" "--border=none" ];
+    };
+    ghostty = {
+      enable = true;
+      settings = {
+        gtk-tabs-location = "bottom";
+        adw-toolbar-style = "flat";
+        gtk-custom-css = [
+          "~/.dotfiles/ghostty/style.css"
+        ]; # TODO: Need to do this in a better way
+        keybind = [
+          "alt+h=previous_tab"
+          "alt+l=next_tab"
+          "shift+alt+h=move_tab:-1"
+          "shift+alt+l=move_tab:1"
+        ];
+      };
     };
     git = {
       enable = true;

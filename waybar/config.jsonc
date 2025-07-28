@@ -5,21 +5,21 @@
 	"margin-right": 5,
 	"spacing": 0,
 	"modules-left": [
-		"hyprland/workspaces",
-		"mpris"
+		"hyprland/workspaces"
 	],
 	"modules-center": [
 		"clock"
 	],
 	"modules-right": [
 		"tray",
+		"memory",
 		"network",
 		"battery"
 	],
 	"hyprland/workspaces": {
 		"disable-scroll": false,
 		"all-outputs": true,
-		"format": "{id}",
+		"format": "{icon}",
 		"on-click": "activate",
 		"persistent-workspaces": {
 			"*": [
@@ -27,6 +27,18 @@
 				2,
 				3
 			]
+		},
+		"format-icons": {
+			"1": "1",
+			"2": "2",
+			"3": "3",
+			"4": "4",
+			"5": "5",
+			"6": "6",
+			"7": "7",
+			"8": "",
+			"9": "󰓇",
+			"10": "10"
 		}
 	},
 	"clock": {
@@ -47,6 +59,11 @@
 	"tray": {
 		"icon-size": 17,
 		"spacing": 6
+	},
+	"memory": {
+		"interval": 10,
+		"format": "  {percentage}% ",
+		"max-length": 10
 	},
 	"network": {
 		"format-wifi": " {icon}{essid} ",

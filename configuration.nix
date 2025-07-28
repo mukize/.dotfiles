@@ -4,6 +4,7 @@
   imports = [ ./hardware-configuration.nix ./kanata.nix ./nvidia.nix ];
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nixpkgs.config.allowUnfree = true;
+  musnix.enable = true;
 
   # Power Management #
   powerManagement.enable = true;
@@ -44,8 +45,16 @@
   users.users.mukize = {
     isNormalUser = true;
     description = "Mukize";
-    extraGroups =
-      [ "networkmanager" "wheel" "uinput" "reboot" "shutdown" "suspend" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "uinput"
+      "input"
+      "reboot"
+      "shutdown"
+      "suspend"
+      "audio"
+    ];
   };
   services = {
     xserver = {
