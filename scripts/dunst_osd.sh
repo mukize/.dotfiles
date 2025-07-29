@@ -1,45 +1,45 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Modification of https://gitlab.com/Nmoleo/i3-volume-brightness-indicator
+# Using wireplumber instead
+# Requires `bc`
 
-# See README.md for usage instructions
-volume_step=1
+volume_step=2
 brightness_step=5
 max_volume=100
-notification_timeout=1000
-download_album_art=true
-show_album_art=true
-show_music_in_volume_indicator=true
+notification_timeout=1200
+download_album_art=false
+show_album_art=false
+show_music_in_volume_indicator=false
 
-# Uses regex to get volume from pactl
+# Get volume from default sink
 function get_volume {
-    pactl get-sink-volume @DEFAULT_SINK@ | grep -Po '[0-9]{1,3}(?=%)' | head -1
+    echo "scale=0; $(wpctl get-volume @DEFAULT_SINK@ | grep -o --color=never '[0-9\.]*')*100" | bc | sed 's/\.0*$//'
 }
 
-# Uses regex to get mute status from pactl
+# Check if default sink is muted
 function get_mute {
-    pactl get-sink-mute @DEFAULT_SINK@ | grep -Po '(?<=Mute: )(yes|no)'
+    wpctl status | grep "\* " | head -1 | grep -o --color=never 'MUTED'
 }
 
-# Uses regex to get brightness from xbacklight
+# Get brightness percentage
 function get_brightness {
-    sudo light | grep -Po '[0-9]{1,3}' | head -n 1
+    brightnessctl i | grep -Po --color=never '([0-9])*%' | sed 's/.$//'
 }
 
 # Returns a mute icon, a volume-low icon, or a volume-high icon, depending on the volume
 function get_volume_icon {
-    volume=$(get_volume)
-    mute=$(get_mute)
-    if [ "$volume" -eq 0 ] || [ "$mute" == "yes" ] ; then
-        volume_icon=""
+    if [ $(get_volume) -eq 0 ] || [ "$(get_mute)" != "" ]; then
+        volume_icon=" "
     elif [ "$volume" -lt 50 ]; then
-        volume_icon=""
+        volume_icon=" "
     else
-        volume_icon=""
+        volume_icon=" "
     fi
 }
 
 # Always returns the same icon - I couldn't get the brightness-low icon to work with fontawesome
 function get_brightness_icon {
-    brightness_icon=""
+    brightness_icon="󰃠 "
 }
 
 function get_album_art {
@@ -59,7 +59,7 @@ function get_album_art {
     elif [[ $url == "https://"* ]] && [[ $download_album_art == "true" ]]; then
         # Identify filename from URL
         filename="$(echo $url | sed "s/.*\///")"
-        
+
         # Download file to /tmp if it doesn't exist
         if [ ! -f "/tmp/$filename" ]; then
             wget -O "/tmp/$filename" "$url"
@@ -73,7 +73,7 @@ function get_album_art {
 
 # Displays a volume notification
 function show_volume_notif {
-    volume=$(get_mute)
+    volume=$(get_volume)
     get_volume_icon
 
     if [[ $show_music_in_volume_indicator == "true" ]]; then
@@ -83,9 +83,9 @@ function show_volume_notif {
             get_album_art
         fi
 
-        notify-send -t $notification_timeout -h string:x-dunst-stack-tag:volume_notif -h int:value:$volume -i "$album_art" "$volume_icon $volume%" "$current_song"
+        dunstify -t $notification_timeout -u LOW -h string:x-dunst-stack-tag:volume_notif -h int:value:$volume -i "$album_art" "$volume_icon $volume%" "$current_song"
     else
-        notify-send -t $notification_timeout -h string:x-dunst-stack-tag:volume_notif -h int:value:$volume "$volume_icon $volume%"
+        dunstify -t $notification_timeout -u LOW -h string:x-dunst-stack-tag:volume_notif -h int:value:$volume "$volume_icon $volume%"
     fi
 }
 
@@ -99,52 +99,56 @@ function show_music_notif {
         get_album_art
     fi
 
-    notify-send -t $notification_timeout -h string:x-dunst-stack-tag:music_notif -i "$album_art" "$song_title" "$song_artist - $song_album"
+    dunstify -t $notification_timeout -u LOW -h string:x-dunst-stack-tag:music_notif -i "$album_art" "$song_title" "$song_artist - $song_album"
 }
 
 # Displays a brightness notification using dunstify
 function show_brightness_notif {
     brightness=$(get_brightness)
-    echo $brightness
     get_brightness_icon
-    notify-send -t $notification_timeout -h string:x-dunst-stack-tag:brightness_notif -h int:value:$brightness "$brightness_icon $brightness%"
+    dunstify -t $notification_timeout -u LOW -h string:x-dunst-stack-tag:brightness_notif -h int:value:$brightness "$brightness_icon $brightness%"
 }
 
 # Main function - Takes user input, "volume_up", "volume_down", "brightness_up", or "brightness_down"
 case $1 in
     volume_up)
     # Unmutes and increases volume, then displays the notification
-    pactl set-sink-mute @DEFAULT_SINK@ 0
+    wpctl set-mute @DEFAULT_SINK@ 0
     volume=$(get_volume)
-    if [ $(( "$volume" + "$volume_step" )) -gt $max_volume ]; then
-        pactl set-sink-volume @DEFAULT_SINK@ $max_volume%
+    if [ $(( $volume + $volume_step )) -gt $max_volume ]; then
+        wpctl set-volume @DEFAULT_SINK@ $max_volume%
     else
-        pactl set-sink-volume @DEFAULT_SINK@ +$volume_step%
+        wpctl set-volume @DEFAULT_SINK@ $volume_step%+
     fi
     show_volume_notif
     ;;
 
     volume_down)
     # Raises volume and displays the notification
-    pactl set-sink-volume @DEFAULT_SINK@ -$volume_step%
+        wpctl set-volume @DEFAULT_SINK@ $volume_step%-
     show_volume_notif
     ;;
 
     volume_mute)
     # Toggles mute and displays the notification
-    pactl set-sink-mute @DEFAULT_SINK@ toggle
+    wpctl set-mute @DEFAULT_SINK@ toggle
     show_volume_notif
     ;;
 
     brightness_up)
     # Increases brightness and displays the notification
-    sudo light -A $brightness_step 
+    brightnessctl s +$brightness_step%
     show_brightness_notif
     ;;
 
     brightness_down)
     # Decreases brightness and displays the notification
-    sudo light -U $brightness_step
+    brightness=$(get_brightness)
+    if [ $(( $brightness - $brightness_step )) -lt 10 ]; then
+        brightnessctl s 10%
+    else
+        brightnessctl s $brightness_step%-
+    fi
     show_brightness_notif
     ;;
 

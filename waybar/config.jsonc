@@ -61,7 +61,7 @@
 		"spacing": 6
 	},
 	"memory": {
-		"interval": 10,
+		"interval": 5,
 		"format": "  {percentage}% ",
 		"max-length": 10
 	},

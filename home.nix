@@ -22,7 +22,6 @@
     hyprshot
     hyprpicker
     hyprsysteminfo
-    libreoffice-fresh
     nautilus
     neovim
     mission-center
@@ -31,7 +30,9 @@
     pavucontrol
     spotify
     webcord
+    wpsoffice
     ### CLI
+    bc
     dysk
     ffmpeg
     gnumake
