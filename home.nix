@@ -6,7 +6,7 @@
   home.homeDirectory = "/home/mukize";
   home.sessionVariables = {
     EDITOR = "nvim";
-    MOZ_LEGACY_PROFILES = "1";
+    # MOZ_LEGACY_PROFILES = "1";
     NIXOS_OZONE_WL = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
     HYPRSHOT_DIR = "~/Pictures/Screenshots";
@@ -22,6 +22,7 @@
     hyprshot
     hyprpicker
     hyprsysteminfo
+    gparted
     nautilus
     neovim
     mission-center
