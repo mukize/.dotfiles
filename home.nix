@@ -59,6 +59,7 @@
     cargo
     nodejs_24
     python3Full
+    uv
   ];
 
   xdg.mimeApps = {
@@ -133,6 +134,7 @@
       settings = {
         gtk-tabs-location = "bottom";
         adw-toolbar-style = "flat";
+        gtk-wide-tabs = true;
         gtk-custom-css = [
           "~/.dotfiles/ghostty/style.css"
         ]; # TODO: Need to do this in a better way
