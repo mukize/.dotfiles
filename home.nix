@@ -27,6 +27,7 @@
     neovim
     mission-center
     mullvad-vpn
+    mpv
     obsidian
     pavucontrol
     spotify
@@ -43,6 +44,7 @@
     just
     mprocs
     unzip
+    unrar
     sqlite
     wget
     ### Libaries

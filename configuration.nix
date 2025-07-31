@@ -6,40 +6,11 @@
   nixpkgs.config.allowUnfree = true;
   musnix.enable = true;
 
-  # Power Management #
-  powerManagement.enable = true;
-  programs.auto-cpufreq.enable = true;
-  services.logind.lidSwitch = "suspend";
-  services.logind.lidSwitchExternalPower = "ignore";
-  services.logind.lidSwitchDocked = "ignore";
-  services.thermald.enable = true;
-  # ---------------- #
-
-  # Bluetooth #
-  hardware.bluetooth.enable = true;
-  services.blueman.enable = true;
-  # --------- #
-
-  # Sound #
-  services.playerctld.enable = true;
-  services.pipewire = {
-    enable = true;
-    wireplumber.enable = true;
-    alsa.enable = true;
-    pulse.enable = true;
-    jack.enable = true;
-  };
-  # ----- #
-
   boot = {
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
   };
 
-  networking = {
-    hostName = "mukize";
-    networkmanager.enable = true;
-  };
   time.timeZone = "Africa/Johannesburg";
   i18n.defaultLocale = "en_ZA.UTF-8";
   users.users.mukize = {
@@ -65,15 +36,48 @@
     udisks2.enable = true; # # auto mounting
     fwupd.enable = true; # firmware updates
   };
-  services.mullvad-vpn.enable = true;
   environment = {
     sessionVariables.NIXOS_OZONE_WL = "1";
     systemPackages = with pkgs; [ networkmanagerapplet brightnessctl ];
   };
+
+  # Networking #
+  networking = {
+    hostName = "mukize";
+    networkmanager.enable = true;
+  };
+  services.mullvad-vpn.enable = true;
+  # ---------- #
+
   # zsh #
   programs.zsh.enable = true;
   users.users.mukize.shell = pkgs.zsh;
   # --- #
+
+  # Power Management #
+  powerManagement.enable = true;
+  programs.auto-cpufreq.enable = true;
+  services.logind.lidSwitch = "suspend";
+  services.logind.lidSwitchExternalPower = "ignore";
+  services.logind.lidSwitchDocked = "ignore";
+  services.thermald.enable = true;
+  # ---------------- #
+
+  # Bluetooth #
+  hardware.bluetooth.enable = true;
+  services.blueman.enable = true;
+  # --------- #
+
+  # Sound #
+  services.playerctld.enable = true;
+  services.pipewire = {
+    enable = true;
+    wireplumber.enable = true;
+    alsa.enable = true;
+    pulse.enable = true;
+    jack.enable = true;
+  };
+  # ----- #
 
   # graphics #
   hardware.graphics.enable = true;
@@ -115,4 +119,13 @@
     opacity.terminal = 0.75;
   };
   # ------ #
+
+  # Steam #
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+    localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
+  };
+  # ----- #
 }
