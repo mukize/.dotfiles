@@ -18,6 +18,9 @@
   };
   home.packages = with pkgs; [
     ### Applications
+    ardour
+    decent-sampler
+    davinci-resolve
     firefox
     hyprshot
     hyprpicker
@@ -31,8 +34,10 @@
     obsidian
     pavucontrol
     spotify
+    styluslabs-write
     webcord
     wpsoffice
+    xournalpp
     ### CLI
     bc
     dysk
@@ -61,8 +66,8 @@
     gcc
     cargo
     nodejs_24
-    python3Full
-    uv
+    python3Full uv
+    ocaml ocamlPackages.utop
   ];
 
   xdg.mimeApps = {
@@ -89,10 +94,10 @@
     };
     fusuma = {
       enable = true;
-      settings = {
-        swipe."3".up.command = "swayosd-client --output-volume raise";
-        swipe."3".down.command = "swayosd-client --output-volume lower";
-        hold."3".command = "playerctl play-pause";
+      settings = let bash = "/etc/profiles/per-user/mukize/bin/bash"; in {
+        swipe."3".up.command = bash + " ~/.dotfiles/scripts/dunst_osd.sh volume-up";
+        swipe."3".down.command = bash + " ~/.dotfiles/scripts/dunst_osd.sh volume-down";
+        hold."3".command = "/etc/profiles/per-user/mukize/bin/playerctl play-pause";
       };
     };
     udiskie = {

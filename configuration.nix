@@ -1,12 +1,14 @@
 { pkgs, ... }: {
 
-  system.stateVersion = "25.05";
   imports = [ ./hardware-configuration.nix ./kanata.nix ./nvidia.nix ];
+
+  system.stateVersion = "25.05";
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nixpkgs.config.allowUnfree = true;
-  musnix.enable = true;
 
   boot = {
+    plymouth.enable = true;
+    kernelModules = [ "uinput" ];
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
   };
@@ -68,7 +70,7 @@
   services.blueman.enable = true;
   # --------- #
 
-  # Sound #
+  # Audio #
   services.playerctld.enable = true;
   services.pipewire = {
     enable = true;
@@ -77,6 +79,7 @@
     pulse.enable = true;
     jack.enable = true;
   };
+  musnix.enable = true;
   # ----- #
 
   # graphics #
@@ -120,12 +123,15 @@
   };
   # ------ #
 
-  # Steam #
+  # Gaming #
   programs.steam = {
     enable = true;
+    gamescopeSession.enable = true;
     remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
     localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
   };
-  # ----- #
+  programs.gamemode.enable = true;
+  # ------ #
+
 }

@@ -144,8 +144,8 @@ case $1 in
     brightness_down)
     # Decreases brightness and displays the notification
     brightness=$(get_brightness)
-    if [ $(( $brightness - $brightness_step )) -lt 10 ]; then
-        brightnessctl s 10%
+    if [ $(( $brightness - $brightness_step )) -lt $brightness_step ]; then
+        brightnessctl s $brightness_step%
     else
         brightnessctl s $brightness_step%-
     fi
