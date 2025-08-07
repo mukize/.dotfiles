@@ -12,7 +12,7 @@
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
   };
-
+  hardware.opentabletdriver.enable = true;
   time.timeZone = "Africa/Johannesburg";
   i18n.defaultLocale = "en_ZA.UTF-8";
   users.users.mukize = {
@@ -47,8 +47,19 @@
   networking = {
     hostName = "mukize";
     networkmanager.enable = true;
+    nat = {
+      enable = true;
+      externalInterface = "enp0s20f0u4";
+      internalInterfaces = ["lo"];
+    };
   };
   services.mullvad-vpn.enable = true;
+  services.miniupnpd = {
+    enable = true;
+    externalInterface = "enp0s20f0u4";
+    internalIPs = [ "lo" ];
+  };
+
   # ---------- #
 
   # zsh #
@@ -82,8 +93,9 @@
   musnix.enable = true;
   # ----- #
 
-  # graphics #
+  # Graphics #
   hardware.graphics.enable = true;
+  hardware.graphics.extraPackages = with pkgs; [ vaapiIntel intel-media-driver vpl-gpu-rt ];
   services.displayManager = {
     enable = true;
     gdm.enable = true;
@@ -114,6 +126,8 @@
       package = pkgs.nerd-fonts.zed-mono;
       name = "ZedMonoNerdFont";
     };
+    # fonts.monospace.package = pkgs.nerd-fonts.fira-code;
+    # fonts.monospace.name = "FiraCode Nerd Font";
     fonts.sizes = {
       desktop = 10;
       applications = 10;
@@ -131,7 +145,13 @@
     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
     localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
   };
-  programs.gamemode.enable = true;
+  programs.gamemode = {
+    enable = true;
+  };
+  programs.gamescope = {
+    enable = true;
+    capSysNice = true;
+  };
   # ------ #
 
 }

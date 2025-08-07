@@ -26,15 +26,18 @@
     hyprpicker
     hyprsysteminfo
     gparted
+    onlyoffice-bin
     nautilus
     neovim
     mission-center
     mullvad-vpn
     mpv
     obsidian
+    opentabletdriver
     pavucontrol
     spotify
     styluslabs-write
+    virtualbox
     webcord
     wpsoffice
     xournalpp
