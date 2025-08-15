@@ -11,6 +11,7 @@
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
     HYPRSHOT_DIR = "~/Pictures/Screenshots";
     AQ_DRM_DEVICES = "/dev/dri/card2";
+    PATH = "$PATH:/home/mukize/.local/share/yabridge";
   };
   home.shellAliases = {
     "cd" = "z";
@@ -18,15 +19,13 @@
   };
   home.packages = with pkgs; [
     ### Applications
-    ardour
     decent-sampler
     davinci-resolve
     firefox
-    hyprshot
-    hyprpicker
-    hyprsysteminfo
+    hyprshot hyprpicker hyprsysteminfo
     gparted
-    onlyoffice-bin
+    carla guitarix gxplugins-lv2
+    onlyoffice-bin wpsoffice
     nautilus
     neovim
     mission-center
@@ -35,12 +34,19 @@
     obsidian
     opentabletdriver
     pavucontrol
+    peazip
+    reaper
+    reaper-reapack-extension
     spotify
     styluslabs-write
     virtualbox
     webcord
-    wpsoffice
+    qjackctl
     xournalpp
+    winetricks
+    winePackages.yabridge
+    (yabridge.override { wine = winePackages.yabridge; })
+    (yabridgectl.override { wine = winePackages.yabridge; })
     ### CLI
     bc
     dysk
@@ -90,6 +96,9 @@
     dunst = {
       enable = true;
       settings = {
+        global.origin = "top-center";
+        global.offset = "(0, 20)";
+        global.alignment = "center";
         global.corner_radius = 8;
         urgency_low.timeout = 5;
         urgency_normal.timeout = 5;

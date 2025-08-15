@@ -5,6 +5,11 @@
   system.stateVersion = "25.05";
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nixpkgs.config.allowUnfree = true;
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+    ];
+  };
 
   boot = {
     plymouth.enable = true;
@@ -40,7 +45,10 @@
   };
   environment = {
     sessionVariables.NIXOS_OZONE_WL = "1";
-    systemPackages = with pkgs; [ networkmanagerapplet brightnessctl ];
+    systemPackages = with pkgs; [
+      networkmanagerapplet
+      brightnessctl
+    ];
   };
 
   # Networking #
@@ -82,15 +90,20 @@
   # --------- #
 
   # Audio #
+  security.rtkit.enable = true;
   services.playerctld.enable = true;
   services.pipewire = {
     enable = true;
-    wireplumber.enable = true;
     alsa.enable = true;
-    pulse.enable = true;
+    alsa.support32Bit = true;
     jack.enable = true;
+    pulse.enable = true;
+    wireplumber.enable = true;
   };
+
   musnix.enable = true;
+  musnix.rtcqs.enable = true;
+  musnix.soundcardPciId = "00:1f.3";
   # ----- #
 
   # Graphics #
@@ -106,7 +119,6 @@
     xwayland.enable = true;
   };
   xdg.portal.enable = true;
-  security.rtkit.enable = true;
   security.pam.services.hyprlock = { };
   # ------------------- #
 
@@ -122,10 +134,10 @@
       name = "BreezeX-RosePineDawn-Linux";
       size = 24;
     };
-    fonts.monospace = {
-      package = pkgs.nerd-fonts.zed-mono;
-      name = "ZedMonoNerdFont";
-    };
+    fonts.monospace.package = pkgs.nerd-fonts.zed-mono;
+    fonts.monospace.name = "ZedMonoNerdFont";
+    # fonts.monospace.package = pkgs.nerd-fonts.victor-mono;
+    # fonts.monospace.name = "VictorMono Nerd Font";
     # fonts.monospace.package = pkgs.nerd-fonts.fira-code;
     # fonts.monospace.name = "FiraCode Nerd Font";
     fonts.sizes = {
