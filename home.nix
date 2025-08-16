@@ -1,6 +1,6 @@
 { pkgs, zen-browser, ... }: {
 
-  imports = [ zen-browser.homeModules.twilight ./stylix.nix ];
+  imports = [ zen-browser.homeModules.twilight ];
   home.stateVersion = "25.05";
   home.username = "mukize";
   home.homeDirectory = "/home/mukize";
@@ -19,43 +19,37 @@
   };
   home.packages = with pkgs; [
     ### Applications
-    decent-sampler
+    carla decent-sampler guitarix gxplugins-lv2 # music
     davinci-resolve
-    firefox
-    hyprshot hyprpicker hyprsysteminfo
     gparted
-    carla guitarix gxplugins-lv2
-    onlyoffice-bin wpsoffice
+    hyprshot hyprpicker hyprsysteminfo
+    onlyoffice-bin
     nautilus
     neovim
-    mission-center
     mullvad-vpn
     mpv
     obsidian
     opentabletdriver
     pavucontrol
-    peazip
-    reaper
-    reaper-reapack-extension
+    reaper reaper-reapack-extension
     spotify
     styluslabs-write
     virtualbox
     webcord
     qjackctl
     xournalpp
-    winetricks
-    winePackages.yabridge
-    (yabridge.override { wine = winePackages.yabridge; })
-    (yabridgectl.override { wine = winePackages.yabridge; })
+    winetricks wineWowPackages.waylandFull
+    (yabridge.override { wine = wineWowPackages.waylandFull; })
+    (yabridgectl.override { wine = wineWowPackages.waylandFull; })
     ### CLI
     bc
     dysk
     ffmpeg
     gnumake
     jq
-    grim
-    slurp
+    grim slurp # screenshots
     just
+    manix nix-init # nix utils
     mprocs
     unzip
     unrar
@@ -90,6 +84,15 @@
     };
   };
 
+  # Stylix #
+  stylix.targets.waybar.enable = false;
+  stylix.targets.zen-browser.enable = false;
+  stylix.targets.gtk.extraCss = ''
+    @define-color window_fg_color #f0f2fc;
+  '';
+  # ------ #
+
+  # Services #
   services = {
     hyprpaper.enable = true;
     playerctld.enable = true;
@@ -116,11 +119,14 @@
       enable = true;
       settings.program_options.file_manager = "nautilus";
     };
-    swayosd = {
-      enable = true;
-      stylePath = ./swayosd/style.css;
-    };
+    # swayosd = {
+    #   enable = true;
+    #   stylePath = ./swayosd/style.css;
+    # };
   };
+  #----------#
+
+  # Programs #
   programs = {
     bash.enable = true;
     bat.enable = true;
@@ -186,10 +192,6 @@
         }
       '';
     };
-    nh = {
-      enable = true;
-      flake = "~/.dotfiles";
-    };
     oh-my-posh = {
       enable = true;
       useTheme = "pure";
@@ -241,7 +243,7 @@
         "zen.view.use-single-toolbar"."Value" = true;
       };
     };
-
   };
+  #----------#
 
 }
