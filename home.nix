@@ -38,9 +38,9 @@
     webcord
     qjackctl
     xournalpp
-    winetricks wineWowPackages.waylandFull
-    (yabridge.override { wine = wineWowPackages.waylandFull; })
-    (yabridgectl.override { wine = wineWowPackages.waylandFull; })
+    wine
+    yabridge
+    yabridgectl
     ### CLI
     bc
     dysk
