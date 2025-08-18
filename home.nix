@@ -34,7 +34,6 @@
     reaper reaper-reapack-extension
     spotify
     styluslabs-write
-    virtualbox
     webcord
     qjackctl
     xournalpp

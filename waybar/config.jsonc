@@ -21,13 +21,6 @@
 		"all-outputs": true,
 		"format": "{icon}",
 		"on-click": "activate",
-		"persistent-workspaces": {
-			"*": [
-				1,
-				2,
-				3
-			]
-		},
 		"format-icons": {
 			"1": "1",
 			"2": "2",

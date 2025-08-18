@@ -1,15 +1,28 @@
 { pkgs, ... }: {
 
-  imports = [ ./hardware-configuration.nix ./kanata.nix ./nvidia.nix ];
+  imports = [
+    ./hardware-configuration.nix
+    ./kanata.nix
+    ./nvidia.nix
+  ];
 
   system.stateVersion = "25.05";
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nixpkgs.config.allowUnfree = true;
+
+  # Nix-ld #
   programs.nix-ld = {
     enable = true;
-    libraries = with pkgs; [
-    ];
+    libraries = with pkgs; [ ];
   };
+  # ----- #
+
+  # Virtualisation #
+  programs.virt-manager.enable = true;
+  users.groups.libvirtd.members = ["mukize"];
+  virtualisation.libvirtd.enable = true;
+  virtualisation.spiceUSBRedirection.enable = true;
+  # -------------- #
 
   boot = {
     plymouth.enable = true;
@@ -67,7 +80,6 @@
     externalInterface = "enp0s20f0u4";
     internalIPs = [ "lo" ];
   };
-
   # ---------- #
 
   # zsh #
@@ -142,10 +154,6 @@
     };
     fonts.monospace.package = pkgs.nerd-fonts.zed-mono;
     fonts.monospace.name = "ZedMonoNerdFont";
-    # fonts.monospace.package = pkgs.nerd-fonts.victor-mono;
-    # fonts.monospace.name = "VictorMono Nerd Font";
-    # fonts.monospace.package = pkgs.nerd-fonts.fira-code;
-    # fonts.monospace.name = "FiraCode Nerd Font";
     fonts.sizes = {
       desktop = 10;
       applications = 10;

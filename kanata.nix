@@ -19,7 +19,7 @@
         devices = [
           #`ls /dev/input/by-path/`
           "/dev/input/by-path/platform-i8042-serio-0-event-kbd"
-          "/dev/input/by-path/pci-0000:00:14.0-usb-0:1:1.0-event-kbd"
+          "/dev/input/by-id/usb-Compx_2.4G_Wireless_Receiver-event-kbd"
         ];
         extraDefCfg = ''
           process-unmapped-keys yes
