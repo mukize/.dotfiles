@@ -9,11 +9,12 @@
   system.stateVersion = "25.05";
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   nixpkgs.config.allowUnfree = true;
+  
 
   # Nix-ld #
   programs.nix-ld = {
     enable = true;
-    libraries = with pkgs; [ ];
+    libraries = [ ];
   };
   # ----- #
 
@@ -22,8 +23,19 @@
   users.groups.libvirtd.members = ["mukize"];
   virtualisation.libvirtd.enable = true;
   virtualisation.spiceUSBRedirection.enable = true;
+
+  virtualisation.containers.enable = true;
+  virtualisation.docker.enable = true;
+  virtualisation.docker.rootless = {
+    enable = true;
+    setSocketVariable = true;
+  };
+  virtualisation.virtualbox.host.enable = true;
+  users.extraGroups.vboxusers.members = [ "mukize" ];
+  virtualisation.virtualbox.host.enableExtensionPack = true;
   # -------------- #
 
+  programs.adb.enable = true;
   boot = {
     plymouth.enable = true;
     kernelModules = [ "uinput" ];
@@ -37,23 +49,26 @@
     isNormalUser = true;
     description = "Mukize";
     extraGroups = [
-      "networkmanager"
-      "wheel"
-      "uinput"
-      "input"
-      "reboot"
-      "shutdown"
-      "suspend"
+      "networkmanager" "wheel"
+      "uinput" "input"
+      "reboot" "shutdown" "suspend"
       "audio"
+      "libvirtd" "podman"
+      "adbusers"
     ];
   };
   services = {
+    udisks2.enable = true;
     xserver = {
       enable = true;
       xkb.layout = "za";
       xkb.variant = "";
     };
-    udisks2.enable = true; # # auto mounting
+    mysql = {
+      enable = true;
+      package = pkgs.mysql80;
+    };
+    gvfs.enable = true; # for removable media
     fwupd.enable = true; # firmware updates
   };
   environment = {
@@ -61,6 +76,7 @@
     systemPackages = with pkgs; [
       networkmanagerapplet
       brightnessctl
+      gparted
     ];
   };
 
@@ -68,6 +84,18 @@
   networking = {
     hostName = "mukize";
     networkmanager.enable = true;
+    firewall = {
+      allowedTCPPortRanges = [
+        { from = 54321; to = 54324; }
+        { from = 8080; to = 8082; }
+      ];
+      allowedTCPPorts  = [ 9099 5001 ];
+      allowedUDPPorts  = [ 9099 5001 ];
+      allowedUDPPortRanges = [
+        { from = 54321; to = 54324; }
+        { from = 8080; to = 8082; }
+      ];
+    };
     nat = {
       enable = true;
       externalInterface = "enp0s20f0u4";
@@ -117,16 +145,24 @@
     jack.enable = true;
     pulse.enable = true;
     wireplumber.enable = true;
+    # extraConfig.pipewire."92-low-latency" = {
+    #   "context.properties" = {
+    #     "default.clock.rate" = 44100;
+    #     "default.clock.quantum" = 256;
+    #   };
+    # };
   };
 
   musnix.enable = true;
   musnix.rtcqs.enable = true;
-  musnix.soundcardPciId = "00:1f.3";
+  # musnix.kernel.realtime = true; # TODO: nvidia drivers don't support realtime
+  # musnix.kernel.packages = pkgs.linuxPackages_latest_rt;
+  # musnix.soundcardPciId = "00:1f.3";
   # ----- #
 
   # Graphics #
   hardware.graphics.enable = true;
-  hardware.graphics.extraPackages = with pkgs; [ vaapiIntel intel-media-driver vpl-gpu-rt ];
+  hardware.graphics.extraPackages = with pkgs; [ intel-vaapi-driver intel-media-driver vpl-gpu-rt ];
   services.displayManager = {
     enable = true;
     gdm.enable = true;
@@ -138,7 +174,7 @@
   };
   xdg.portal.enable = true;
   security.pam.services.hyprlock = { };
-  # ------------------- #
+  # -------- #
 
   # Stylix #
   stylix = {

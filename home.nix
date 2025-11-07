@@ -1,4 +1,4 @@
-{ pkgs, zen-browser, ... }: {
+{ pkgs, zen-browser, ... }: rec {
 
   imports = [ zen-browser.homeModules.twilight ];
   home.stateVersion = "25.05";
@@ -7,53 +7,71 @@
   home.sessionVariables = {
     EDITOR = "nvim";
     # MOZ_LEGACY_PROFILES = "1";
+    PNPM_HOME = home.homeDirectory + "/.pnpm";
     NIXOS_OZONE_WL = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "wayland";
     HYPRSHOT_DIR = "~/Pictures/Screenshots";
     AQ_DRM_DEVICES = "/dev/dri/card2";
-    PATH = "$PATH:/home/mukize/.local/share/yabridge";
+    PATH = "$PATH:/home/mukize/.local/share/yabridge:/home/mukize/.pnpm";
   };
   home.shellAliases = {
     "cd" = "z";
     "nv" = "nvim";
+    "p" = "pnpm";
+    "px" = "pnpx";
   };
   home.packages = with pkgs; [
     ### Applications
-    carla decent-sampler guitarix gxplugins-lv2 # music
-    davinci-resolve
+    decent-sampler guitarix gxplugins-lv2 calf # music
     gparted
+    kdePackages.kdenlive
+    gimp
     hyprshot hyprpicker hyprsysteminfo
-    onlyoffice-bin
-    nautilus
-    neovim
-    mullvad-vpn
+    onlyoffice-desktopeditors
+    nautilus gst_all_1.gst-plugins-good gst_all_1.gst-plugins-bad
+      sushi gdk-pixbuf ffmpegthumbnailer kdePackages.kdegraphics-thumbnailers kdePackages.kdesdk-thumbnailers
     mpv
+    vlc
+    giada
+    protontricks
+    docker-compose
     obsidian
     opentabletdriver
     pavucontrol
-    reaper reaper-reapack-extension
+    reaper
     spotify
     styluslabs-write
-    webcord
+    discord
     qjackctl
     xournalpp
-    wine
-    yabridge
-    yabridgectl
+    # wineWowPackages.yabridge
+    wine-wayland
+    winetricks
+    # yabridge
+    # yabridgectl
+    bottles
+    wineasio
+    haruna
     ### CLI
+    neovim
+    devenv
+    exercism
+    imagemagick
     bc
+    android-file-transfer
     dysk
+    gemini-cli
     ffmpeg
     gnumake
     jq
+    presenterm
     grim slurp # screenshots
-    just
+    just mprocs
     manix nix-init # nix utils
-    mprocs
-    unzip
-    unrar
+    unzip unrar ouch # archive utils
     sqlite
     wget
+    vagrant
     ### Libaries
     inotify-tools
     wl-clipboard
@@ -67,9 +85,10 @@
     ### Languages
     gcc
     cargo
-    nodejs_24
-    python3Full uv
+    nodejs_24 yarn pnpm
+    python3 uv
     ocaml ocamlPackages.utop
+    ghc haskell-language-server stack
   ];
 
   xdg.mimeApps = {
@@ -106,17 +125,25 @@
         urgency_normal.timeout = 5;
       };
     };
-    fusuma = {
-      enable = true;
-      settings = let bash = "/etc/profiles/per-user/mukize/bin/bash"; in {
-        swipe."3".up.command = bash + " ~/.dotfiles/scripts/dunst_osd.sh volume-up";
-        swipe."3".down.command = bash + " ~/.dotfiles/scripts/dunst_osd.sh volume-down";
-        hold."3".command = "/etc/profiles/per-user/mukize/bin/playerctl play-pause";
-      };
-    };
+    # fusuma = {
+    #   enable = true;
+    #   settings = let bash = "/etc/profiles/per-user/mukize/bin/bash"; in {
+    #     swipe."3".up.command = bash + " ~/.dotfiles/scripts/dunst_osd.sh volume-up";
+    #     swipe."3".down.command = bash + " ~/.dotfiles/scripts/dunst_osd.sh volume-down";
+    #     hold."3".command = "/etc/profiles/per-user/mukize/bin/playerctl play-pause";
+    #   };
+    # };
     udiskie = {
       enable = true;
-      settings.program_options.file_manager = "nautilus";
+      settings.program_options = {
+        file_manager = "nautilus";
+        device_config = [
+          {
+            id_uuid = [ "80C5-B031" ];
+            options = [ "exec" ];
+          }
+        ];
+      };
     };
     # swayosd = {
     #   enable = true;
@@ -127,12 +154,14 @@
 
   # Programs #
   programs = {
+    java.enable = true;
     bash.enable = true;
     bat.enable = true;
     fd.enable = true;
     gpg.enable = true;
     ripgrep.enable = true;
     tealdeer.enable = true;
+    obs-studio.enable = true;
     tofi = {
       enable = true;
       settings = {
@@ -144,6 +173,9 @@
       enable = true;
       extraConfig = ''
         vim_keys = True
+        proc_tree = True
+        proc_aggregate = True
+        proc_filter_kernel = True
       '';
     };
     eza = {
@@ -168,14 +200,17 @@
           "alt+l=next_tab"
           "shift+alt+h=move_tab:-1"
           "shift+alt+l=move_tab:1"
+          "global:ctrl+`=toggle_quick_terminal"
         ];
       };
     };
     git = {
       enable = true;
-      userName = "Mukize";
-      userEmail = "patrickmukize@gmail.com";
-      extraConfig.init.defaultBranch = "main";
+      settings = {
+        user.name = "Mukize";
+        user.email = "patrickmukize@gmail.com";
+        init.defaultBranch = "main";
+      };
     };
     hyprlock = {
       enable = true;
@@ -189,6 +224,21 @@
             path = screenshot
             blur_passes = 2
         }
+      '';
+    };
+    lutris = {
+      enable = true;
+    };
+    tmux = {
+      enable = true;
+      extraConfig = ''
+      set -g @catppuccin_flavor 'macchiato'
+      run ${pkgs.tmuxPlugins.catppuccin}/share/tmux-plugins/catppuccin/catppuccin.tmux
+
+      set -g status-left ""
+      set -g status-right '#[fg=#{@thm_crust},bg=#{@thm_teal}] session: #S '
+      set -g status-right-length 100
+      set -g status-style padding=0
       '';
     };
     oh-my-posh = {
