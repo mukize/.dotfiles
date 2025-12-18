@@ -2,8 +2,7 @@
   description = "My NixOS configuration";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.05";
-    determinate.url = "https://flakehub.com/f/DeterminateSystems/determinate/*";
+    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.11";
 
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -18,25 +17,39 @@
     auto-cpufreq.inputs.nixpkgs.follows = "nixpkgs";
 
     musnix.url = "github:musnix/musnix";
+    musnix.inputs.nixpkgs.follows = "nixpkgs";
+    neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
   };
-  outputs = { nixpkgs, home-manager, stylix, zen-browser, auto-cpufreq, musnix, nixpkgs-stable, determinate, ... }@inputs: {
-      nixosConfigurations.mukize = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs; };
-        modules = [
-          ./configuration.nix
-          stylix.nixosModules.stylix
-          home-manager.nixosModules.home-manager
-          auto-cpufreq.nixosModules.default
-          musnix.nixosModules.musnix
-          determinate.nixosModules.default
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = { inherit zen-browser; pkgs-stable = nixpkgs-stable; };
-            home-manager.users.mukize = import ./home.nix;
-          }
-        ];
+  outputs = {nixpkgs, ...} @ inputs: let
+    system = "x86_64-linux";
+    pkgs-stable = import inputs.nixpkgs-stable {inherit system;};
+    overlays = [
+      inputs.neovim-nightly-overlay.overlays.default
+    ];
+  in {
+    nixosConfigurations.mukize = nixpkgs.lib.nixosSystem {
+      specialArgs = {
+        inherit inputs;
+        inherit pkgs-stable;
       };
+      modules = [
+        ./configuration.nix
+        inputs.stylix.nixosModules.stylix
+        inputs.home-manager.nixosModules.home-manager
+        inputs.auto-cpufreq.nixosModules.default
+        inputs.musnix.nixosModules.musnix
+        {
+          nixpkgs.overlays = overlays;
+          home-manager.useGlobalPkgs = true;
+          home-manager.backupFileExtension = "backup";
+          home-manager.useUserPackages = true;
+          home-manager.extraSpecialArgs = {
+            inherit (inputs) zen-browser;
+            inherit pkgs-stable;
+          };
+          home-manager.users.mukize = import ./home.nix;
+        }
+      ];
     };
+  };
 }

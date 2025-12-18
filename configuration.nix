@@ -1,5 +1,8 @@
-{ pkgs, ... }: {
-
+{
+  pkgs,
+  pkgs-stable,
+  ...
+}: {
   imports = [
     ./hardware-configuration.nix
     ./kanata.nix
@@ -7,54 +10,55 @@
   ];
 
   system.stateVersion = "25.05";
-  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = ["nix-command" "flakes"];
   nixpkgs.config.allowUnfree = true;
-  
-
-  # Nix-ld #
-  programs.nix-ld = {
-    enable = true;
-    libraries = [ ];
-  };
-  # ----- #
 
   # Virtualisation #
   programs.virt-manager.enable = true;
   users.groups.libvirtd.members = ["mukize"];
-  virtualisation.libvirtd.enable = true;
-  virtualisation.spiceUSBRedirection.enable = true;
-
-  virtualisation.containers.enable = true;
-  virtualisation.docker.enable = true;
-  virtualisation.docker.rootless = {
-    enable = true;
-    setSocketVariable = true;
+  virtualisation = {
+    libvirtd.enable = true;
+    spiceUSBRedirection.enable = true;
+    containers.enable = true;
+    docker = {
+      enable = true;
+      rootless.enable = true;
+      rootless.setSocketVariable = true;
+    };
+    virtualbox = {
+      host.enable = false;
+      host.package = pkgs-stable.virtualbox;
+      host.enableExtensionPack = true;
+    };
   };
-  virtualisation.virtualbox.host.enable = true;
-  users.extraGroups.vboxusers.members = [ "mukize" ];
-  virtualisation.virtualbox.host.enableExtensionPack = true;
+  users.extraGroups.vboxusers.members = ["mukize"];
   # -------------- #
 
   programs.adb.enable = true;
   boot = {
     plymouth.enable = true;
-    kernelModules = [ "uinput" ];
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
   };
   hardware.opentabletdriver.enable = true;
+
   time.timeZone = "Africa/Johannesburg";
   i18n.defaultLocale = "en_ZA.UTF-8";
   users.users.mukize = {
     isNormalUser = true;
     description = "Mukize";
     extraGroups = [
-      "networkmanager" "wheel"
-      "uinput" "input"
-      "reboot" "shutdown" "suspend"
       "audio"
-      "libvirtd" "podman"
       "adbusers"
+      "libvirtd"
+      "input"
+      "networkmanager"
+      "podman"
+      "reboot"
+      "shutdown"
+      "suspend"
+      "uinput"
+      "wheel"
     ];
   };
   services = {
@@ -86,14 +90,26 @@
     networkmanager.enable = true;
     firewall = {
       allowedTCPPortRanges = [
-        { from = 54321; to = 54324; }
-        { from = 8080; to = 8082; }
+        {
+          from = 54321;
+          to = 54324;
+        }
+        {
+          from = 8080;
+          to = 8082;
+        }
       ];
-      allowedTCPPorts  = [ 9099 5001 ];
-      allowedUDPPorts  = [ 9099 5001 ];
+      allowedTCPPorts = [9099 5001];
+      allowedUDPPorts = [9099 5001];
       allowedUDPPortRanges = [
-        { from = 54321; to = 54324; }
-        { from = 8080; to = 8082; }
+        {
+          from = 54321;
+          to = 54324;
+        }
+        {
+          from = 8080;
+          to = 8082;
+        }
       ];
     };
     nat = {
@@ -106,7 +122,7 @@
   services.miniupnpd = {
     enable = true;
     externalInterface = "enp0s20f0u4";
-    internalIPs = [ "lo" ];
+    internalIPs = ["lo"];
   };
   # ---------- #
 
@@ -124,9 +140,12 @@
   # Power Management #
   powerManagement.enable = true;
   programs.auto-cpufreq.enable = true;
-  services.logind.lidSwitch = "suspend";
-  services.logind.lidSwitchExternalPower = "ignore";
-  services.logind.lidSwitchDocked = "ignore";
+
+  services.logind.settings.Login = {
+    HandleLidSwitch = "suspend";
+    HandleLidSwitchExternalPower = "ignore";
+    HandleLidSwitchDocked = "ignore";
+  };
   services.thermald.enable = true;
   # ---------------- #
 
@@ -162,7 +181,7 @@
 
   # Graphics #
   hardware.graphics.enable = true;
-  hardware.graphics.extraPackages = with pkgs; [ intel-vaapi-driver intel-media-driver vpl-gpu-rt ];
+  hardware.graphics.extraPackages = with pkgs; [intel-vaapi-driver intel-media-driver vpl-gpu-rt];
   services.displayManager = {
     enable = true;
     gdm.enable = true;
@@ -173,14 +192,13 @@
     xwayland.enable = true;
   };
   xdg.portal.enable = true;
-  security.pam.services.hyprlock = { };
+  security.pam.services.hyprlock = {};
   # -------- #
 
   # Stylix #
   stylix = {
     enable = true;
-    base16Scheme =
-      "${pkgs.base16-schemes}/share/themes/catppuccin-macchiato.yaml";
+    base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-macchiato.yaml";
     image = ./wallpaper.png;
     polarity = "dark";
     cursor = {
@@ -215,5 +233,4 @@
     capSysNice = true;
   };
   # ------ #
-
 }
