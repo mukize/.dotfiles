@@ -5,6 +5,7 @@
   ...
 }: rec {
   imports = [zen-browser.homeModules.twilight];
+  fonts.fontconfig.enable = true;
   home = {
     stateVersion = "25.05";
     username = "mukize";
@@ -18,26 +19,58 @@
       HYPRSHOT_DIR = "~/Pictures/Screenshots";
       AQ_DRM_DEVICES = "/dev/dri/card2";
       PATH = "$PATH:/home/mukize/.local/share/yabridge:/home/mukize/.pnpm";
-    };
+    } //
+    (let
+      makePluginPath = format:
+        (pkgs.lib.makeSearchPath format [
+          "$HOME/.nix-profile/lib"
+          "/run/current-system/sw/lib"
+          "/etc/profiles/per-user/$USER/lib"
+        ])
+        + ":$HOME/.${format}";
+    in {
+      DSSI_PATH   = makePluginPath "dssi";
+      LADSPA_PATH = makePluginPath "ladspa";
+      LV2_PATH    = makePluginPath "lv2";
+      LXVST_PATH  = makePluginPath "lxvst";
+      VST_PATH    = makePluginPath "vst";
+      VST3_PATH   = makePluginPath "vst3";
+    });
     shellAliases = {
       "cd" = "z";
       "nv" = "nvim";
       "p" = "pnpm";
       "px" = "pnpx";
     };
-    packages = with pkgs; [
-      ### Applications
+    packages = with pkgs; (
+      [
+      ### Music
       decent-sampler
       guitarix
-      gxplugins-lv2
-      calf # music
+      calf
+      pkgs-stable.giada
+      reaper
+      drumgizmo
+      x42-avldrums
+      bankstown-lv2
+      airwindows
+      ### Applications
       gparted
       kdePackages.kdenlive
       gimp
       hyprshot
       hyprpicker
       hyprsysteminfo
-      onlyoffice-desktopeditors
+      mpv
+      haruna
+      obsidian
+      opentabletdriver
+      pavucontrol
+      spotify
+      discord
+      qjackctl
+      xournalpp
+      ### Files
       # TODO: check what I actually need for video thumbnails
       nautilus
       gst_all_1.gst-plugins-good
@@ -47,18 +80,9 @@
       ffmpegthumbnailer
       kdePackages.kdegraphics-thumbnailers
       kdePackages.kdesdk-thumbnailers
-      mpv
-      haruna
-      giada
+      onlyoffice-desktopeditors
+      ### Wine
       protontricks
-      obsidian
-      opentabletdriver
-      pavucontrol
-      reaper
-      spotify
-      discord
-      qjackctl
-      xournalpp
       # wineWowPackages.yabridge
       wine-wayland
       winetricks
@@ -99,7 +123,6 @@
       font-awesome
       nerd-fonts.jetbrains-mono
       nerd-fonts.caskaydia-cove
-      fontconfig
       ### Languages
       gcc
       cargo
@@ -111,7 +134,7 @@
       ocaml
       ocamlPackages.utop
       lua-language-server
-    ];
+    ]);
   };
 
   xdg.mimeApps = {
@@ -170,7 +193,12 @@
 
   # Programs #
   programs = {
-    java.enable = true;
+    java = {
+      enable = true;
+      package = pkgs.jdk25;
+    };
+
+    wlogout.enable = true;
     bash.enable = true;
     bat.enable = true;
     fd.enable = true;
@@ -206,11 +234,17 @@
           "~/.dotfiles/ghostty/style.css"
         ]; # TODO: Need to do this in a better way
         keybind = [
-          "alt+h=previous_tab"
-          "alt+l=next_tab"
+          "performable:ctrl+c=copy_to_clipboard"
           "shift+alt+h=move_tab:-1"
           "shift+alt+l=move_tab:1"
-          "global:ctrl+`=toggle_quick_terminal"
+          "performable:alt+h=goto_split:down"
+          "performable:alt+k=goto_split:up"
+          "performable:alt+j=goto_split:right"
+          "performable:alt+l=goto_split:left"
+          "alt+l=next_tab"
+          "alt+h=previous_tab"
+          "ctrl+alt+l=next_tab"
+          "ctrl+alt+h=previous_tab"
         ];
       };
     };

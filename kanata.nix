@@ -2,6 +2,7 @@
 
 {
   boot.kernelModules = [ "uinput" ];
+  boot.kernelParams = [ "split_lock_detect=off" ];
   hardware.uinput.enable = true;
   services.udev.extraRules = ''
     KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"

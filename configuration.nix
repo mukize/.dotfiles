@@ -1,7 +1,7 @@
 {
-  pkgs,
-  pkgs-stable,
-  ...
+pkgs,
+pkgs-stable,
+...
 }: {
   imports = [
     ./hardware-configuration.nix
@@ -12,6 +12,15 @@
   system.stateVersion = "25.05";
   nix.settings.experimental-features = ["nix-command" "flakes"];
   nixpkgs.config.allowUnfree = true;
+
+  programs.nix-ld = {
+    enable = true;
+    libraries = with pkgs; [
+      libxml2.out
+      libxtst
+      gcc-unwrapped
+    ];
+  };
 
   # Virtualisation #
   programs.virt-manager.enable = true;
@@ -33,7 +42,6 @@
   };
   users.extraGroups.vboxusers.members = ["mukize"];
   # -------------- #
-
   programs.adb.enable = true;
   boot = {
     plymouth.enable = true;
@@ -52,6 +60,7 @@
       "adbusers"
       "libvirtd"
       "input"
+      "gamemode"
       "networkmanager"
       "podman"
       "reboot"
@@ -99,8 +108,8 @@
           to = 8082;
         }
       ];
-      allowedTCPPorts = [9099 5001];
-      allowedUDPPorts = [9099 5001];
+      allowedTCPPorts = [9099 5001 57621];
+      allowedUDPPorts = [9099 5001 5353];
       allowedUDPPortRanges = [
         {
           from = 54321;
@@ -164,6 +173,9 @@
     jack.enable = true;
     pulse.enable = true;
     wireplumber.enable = true;
+    extraConfig.pipewire = {
+      
+    };
     # extraConfig.pipewire."92-low-latency" = {
     #   "context.properties" = {
     #     "default.clock.rate" = 44100;
@@ -182,6 +194,7 @@
   # Graphics #
   hardware.graphics.enable = true;
   hardware.graphics.extraPackages = with pkgs; [intel-vaapi-driver intel-media-driver vpl-gpu-rt];
+  services.xserver.desktopManager.xfce.enable = true;
   services.displayManager = {
     enable = true;
     gdm.enable = true;
@@ -224,9 +237,18 @@
     remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
     dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
     localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
+    extraPackages = with pkgs; [
+      gamemode.lib
+      gamemode
+      gamescope
+    ];
   };
   programs.gamemode = {
     enable = true;
+    settings = {
+      general.renice = 10;
+      gpu.gpu_device = 0;
+    };
   };
   programs.gamescope = {
     enable = true;
