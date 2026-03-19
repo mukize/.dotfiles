@@ -97,8 +97,8 @@
 			"󰁹"
 		],
 		"events": {
-			"on-discharging-warning": "dunstify -u normal -b 'Low Battery'",
-			"on-discharging-critical": "dunstify -u critical -b 'Very Low Battery'"
+			"on-discharging-warning": "notify-send 'Battery: Warning' '30% battery left' -t 900000 -u critical",
+			"on-discharging-critical": "notify-send 'Battery: Critical' '15% battery left' -t 900000 -u critical"
 		},
 		"tooltip": true
 	},

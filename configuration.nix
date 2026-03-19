@@ -1,16 +1,19 @@
 {
-pkgs,
-pkgs-stable,
-...
-}: {
+  pkgs,
+  pkgs-stable,
+  ...
+}:
+{
   imports = [
     ./hardware-configuration.nix
     ./kanata.nix
     ./nvidia.nix
   ];
-
   system.stateVersion = "25.05";
-  nix.settings.experimental-features = ["nix-command" "flakes"];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
   nixpkgs.config.allowUnfree = true;
 
   programs.nix-ld = {
@@ -21,10 +24,12 @@ pkgs-stable,
       gcc-unwrapped
     ];
   };
-
+  hardware.xpadneo.enable = true;
+  hardware.xone.enable = true;
+  services.udev.packages = [ pkgs.game-devices-udev-rules ];
   # Virtualisation #
   programs.virt-manager.enable = true;
-  users.groups.libvirtd.members = ["mukize"];
+  users.groups.libvirtd.members = [ "mukize" ];
   virtualisation = {
     libvirtd.enable = true;
     spiceUSBRedirection.enable = true;
@@ -40,9 +45,9 @@ pkgs-stable,
       host.enableExtensionPack = true;
     };
   };
-  users.extraGroups.vboxusers.members = ["mukize"];
+  users.extraGroups.vboxusers.members = [ "mukize" ];
   # -------------- #
-  programs.adb.enable = true;
+  # programs.adb.enable = true;
   boot = {
     plymouth.enable = true;
     loader.systemd-boot.enable = true;
@@ -57,6 +62,8 @@ pkgs-stable,
     description = "Mukize";
     extraGroups = [
       "audio"
+      "gns3"
+      "ubridge"
       "adbusers"
       "libvirtd"
       "input"
@@ -90,7 +97,21 @@ pkgs-stable,
       networkmanagerapplet
       brightnessctl
       gparted
+      xwayland-satellite
+      gns3-gui
+      dynamips
+      gns3-server
+      ubridge
+      inetutils
     ];
+  };
+
+  security.wrappers.ubridge = {
+    source = "${pkgs.ubridge}/bin/ubridge";
+    capabilities = "cap_net_admin,cap_net_raw=ep";
+    owner = "root";
+    group = "wheel"; # or your GNS3 group
+    permissions = "u+rx,g+rx";
   };
 
   # Networking #
@@ -108,8 +129,16 @@ pkgs-stable,
           to = 8082;
         }
       ];
-      allowedTCPPorts = [9099 5001 57621];
-      allowedUDPPorts = [9099 5001 5353];
+      allowedTCPPorts = [
+        9099
+        5001
+        57621
+      ];
+      allowedUDPPorts = [
+        9099
+        5001
+        5353
+      ];
       allowedUDPPortRanges = [
         {
           from = 54321;
@@ -124,14 +153,14 @@ pkgs-stable,
     nat = {
       enable = true;
       externalInterface = "enp0s20f0u4";
-      internalInterfaces = ["lo"];
+      internalInterfaces = [ "lo" ];
     };
   };
   services.mullvad-vpn.enable = true;
   services.miniupnpd = {
-    enable = true;
+    enable = false;
     externalInterface = "enp0s20f0u4";
-    internalIPs = ["lo"];
+    internalIPs = [ "lo" ];
   };
   # ---------- #
 
@@ -140,7 +169,7 @@ pkgs-stable,
   users.users.mukize.shell = pkgs.zsh;
   programs.nh = {
     enable = true;
-    clean.enable = true;
+    clean.enable = false;
     clean.extraArgs = "--keep-since 4d --keep 3";
     flake = "/home/mukize/.dotfiles";
   };
@@ -174,7 +203,7 @@ pkgs-stable,
     pulse.enable = true;
     wireplumber.enable = true;
     extraConfig.pipewire = {
-      
+
     };
     # extraConfig.pipewire."92-low-latency" = {
     #   "context.properties" = {
@@ -193,11 +222,17 @@ pkgs-stable,
 
   # Graphics #
   hardware.graphics.enable = true;
-  hardware.graphics.extraPackages = with pkgs; [intel-vaapi-driver intel-media-driver vpl-gpu-rt];
-  services.xserver.desktopManager.xfce.enable = true;
+  hardware.graphics.extraPackages = with pkgs; [
+    intel-vaapi-driver
+    intel-media-driver
+    vpl-gpu-rt
+  ];
+  services.xserver.desktopManager.xfce.enable = false;
   services.displayManager = {
     enable = true;
     gdm.enable = true;
+    gdm.wayland = true;
+    defaultSession = "hyprland-uwsm";
   };
   programs.hyprland = {
     enable = true;
@@ -205,7 +240,7 @@ pkgs-stable,
     xwayland.enable = true;
   };
   xdg.portal.enable = true;
-  security.pam.services.hyprlock = {};
+  security.pam.services.hyprlock = { };
   # -------- #
 
   # Stylix #
@@ -242,6 +277,7 @@ pkgs-stable,
       gamemode
       gamescope
     ];
+    extraCompatPackages = [ pkgs.proton-ge-bin ];
   };
   programs.gamemode = {
     enable = true;

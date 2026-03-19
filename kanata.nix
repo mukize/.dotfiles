@@ -1,8 +1,15 @@
 { ... }:
 
 {
-  boot.kernelModules = [ "uinput" ];
-  boot.kernelParams = [ "split_lock_detect=off" ];
+  boot.kernelModules = [
+    "uinput"
+    "tun"
+    "tap"
+  ];
+  boot.kernelParams = [
+    "split_lock_detect=off"
+    "clearcpuid=514"
+  ];
   hardware.uinput.enable = true;
   services.udev.extraRules = ''
     KERNEL=="uinput", MODE="0660", GROUP="uinput", OPTIONS+="static_node=uinput"
@@ -10,7 +17,10 @@
 
   users.groups.uinput = { };
   systemd.services.kanata-internalKeyboard.serviceConfig = {
-    SupplementaryGroups = [ "input" "uinput" ];
+    SupplementaryGroups = [
+      "input"
+      "uinput"
+    ];
   };
 
   services.kanata = {
@@ -28,18 +38,17 @@
           rapid-event-delay 5
         '';
         config = ''
-                    (defsrc
-                     caps
-                    )
-                    (defalias
-                    escctrl (tap-hold-press 0 175 esc lctrl)
-                    )
-                    (deflayer base
-                     @escctrl
-                    )
+          (defsrc
+           caps
+          )
+          (defalias
+          escctrl (tap-hold-press 0 175 esc lctrl)
+          )
+          (deflayer base
+           @escctrl
+          )
         '';
       };
     };
   };
 }
-

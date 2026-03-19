@@ -3,8 +3,9 @@
   zen-browser,
   pkgs-stable,
   ...
-}: rec {
-  imports = [zen-browser.homeModules.twilight];
+}@inputs:
+rec {
+  imports = [ zen-browser.homeModules.twilight ];
   fonts.fontconfig.enable = true;
   home = {
     stateVersion = "25.05";
@@ -19,47 +20,51 @@
       HYPRSHOT_DIR = "~/Pictures/Screenshots";
       AQ_DRM_DEVICES = "/dev/dri/card2";
       PATH = "$PATH:/home/mukize/.local/share/yabridge:/home/mukize/.pnpm";
-    } //
-    (let
-      makePluginPath = format:
-        (pkgs.lib.makeSearchPath format [
-          "$HOME/.nix-profile/lib"
-          "/run/current-system/sw/lib"
-          "/etc/profiles/per-user/$USER/lib"
-        ])
-        + ":$HOME/.${format}";
-    in {
-      DSSI_PATH   = makePluginPath "dssi";
-      LADSPA_PATH = makePluginPath "ladspa";
-      LV2_PATH    = makePluginPath "lv2";
-      LXVST_PATH  = makePluginPath "lxvst";
-      VST_PATH    = makePluginPath "vst";
-      VST3_PATH   = makePluginPath "vst3";
-    });
+    }
+    // (
+      let
+        makePluginPath =
+          format:
+          (pkgs.lib.makeSearchPath format [
+            "$HOME/.nix-profile/lib"
+            "/run/current-system/sw/lib"
+            "/etc/profiles/per-user/$USER/lib"
+          ])
+          + ":$HOME/.${format}";
+      in
+      {
+        DSSI_PATH = makePluginPath "dssi";
+        LADSPA_PATH = makePluginPath "ladspa";
+        LV2_PATH = makePluginPath "lv2";
+        LXVST_PATH = makePluginPath "lxvst";
+        VST_PATH = makePluginPath "vst";
+        VST3_PATH = makePluginPath "vst3";
+      }
+    );
     shellAliases = {
       "cd" = "z";
       "nv" = "nvim";
+      "nb" = "nix build";
       "p" = "pnpm";
       "px" = "pnpx";
     };
-    packages = with pkgs; (
-      [
+    packages = with pkgs; ([
       ### Music
-      decent-sampler
-      guitarix
+      # decent-sampler
+      # guitarix
       calf
       pkgs-stable.giada
       reaper
       drumgizmo
       x42-avldrums
       bankstown-lv2
-      airwindows
       ### Applications
       gparted
       kdePackages.kdenlive
       gimp
       hyprshot
       hyprpicker
+      hyprpaper
       hyprsysteminfo
       mpv
       haruna
@@ -67,9 +72,11 @@
       opentabletdriver
       pavucontrol
       spotify
+      slack
       discord
       qjackctl
-      xournalpp
+      # xournalpp
+      pulseaudioFull
       ### Files
       # TODO: check what I actually need for video thumbnails
       nautilus
@@ -89,7 +96,6 @@
       # yabridge
       # yabridgectl
       bottles
-      wineasio
       ### CLI
       neovim
       exercism
@@ -118,6 +124,7 @@
       wl-clipboard
       libinput
       libinput-gestures
+      musescore
       ### fonts
       noto-fonts-color-emoji
       font-awesome
@@ -137,6 +144,7 @@
     ]);
   };
 
+  # xdg.enable = true;
   xdg.mimeApps = {
     enable = true;
     defaultApplications = {
@@ -145,31 +153,58 @@
       "x-scheme-handler/https" = "zen-twilight.desktop";
       "x-scheme-handler/about" = "zen-twilight.desktop";
       "x-scheme-handler/unknown" = "zen-twilight.desktop";
+      "application/pdf" = "sioyek.desktop";
+      "application/x-pdf" = "sioyek.desktop";
+      "application/x-cbr" = "sioyek.desktop";
+      "application/x-cbz" = "sioyek.desktop";
     };
   };
 
   stylix.targets = {
     waybar.enable = false;
+    opencode.enable = false;
     zen-browser.enable = false;
     gtk.extraCss = ''
       @define-color window_fg_color #f0f2fc;
     '';
+    vicinae.opacity.enable = false;
   };
+  wayland.windowManager.hyprland.systemd.enable = false;
 
   services = {
-    hyprpaper.enable = true;
-    playerctld.enable = true;
-    dunst = {
+    hyprpaper = {
       enable = true;
+      package = pkgs.hyprpaper;
+    };
+    playerctld.enable = true;
+    mako = {
+      enable = true;
+      settings = {
+        anchor = "top-center";
+        border-radius = 8;
+        default-timeout = 2000;
+        # progress-color = "";
+        # background-color = "#1e1e2e";
+        # text-color = "#1e1e2e";
+      };
+    };
+    dunst = {
+      enable = false;
       settings = {
         global = {
           origin = "top-center";
-          offset = "(0, 20)";
           alignment = "center";
           corner_radius = 8;
         };
         urgency_low.timeout = 5;
         urgency_normal.timeout = 5;
+      };
+    };
+    swaync = {
+      enable = false;
+      settings = {
+        "ignore-gtk-theme" = true;
+        positionX = "center";
       };
     };
     udiskie = {
@@ -178,26 +213,37 @@
         file_manager = "nautilus";
         device_config = [
           {
-            id_uuid = ["80C5-B031"];
-            options = ["exec"];
+            id_type = "ext4";
+            options = [
+              "nosuid"
+              "nodev"
+              "noatime"
+              "errors=remount-ro"
+            ];
           }
         ];
       };
     };
     swayosd = {
       enable = true;
-      stylePath = ./swayosd/style.css;
     };
   };
   #----------#
 
   # Programs #
   programs = {
-    java = {
+    opencode = {
       enable = true;
-      package = pkgs.jdk25;
+      settings.theme = "custom";
+      themes.custom = ./config/opencode.json;
     };
-
+    sioyek = {
+      enable = true;
+      config = {
+        startup_commands = "toggle_custom_color";
+      };
+    };
+    mangohud.enable = true;
     wlogout.enable = true;
     bash.enable = true;
     bat.enable = true;
@@ -215,13 +261,22 @@
         proc_filter_kernel = True
       '';
     };
+    direnv = {
+      enable = true;
+      enableZshIntegration = true;
+      nix-direnv.enable = true;
+    };
     eza = {
       enable = true;
-      extraOptions = ["--group-directories-first"];
+      extraOptions = [ "--group-directories-first" ];
     };
     fzf = {
       enable = true;
-      defaultOptions = ["--info=inline-right" "--ansi" "--border=none"];
+      defaultOptions = [
+        "--info=inline-right"
+        "--ansi"
+        "--border=none"
+      ];
     };
     ghostty = {
       enable = true;
@@ -270,6 +325,10 @@
         }
       '';
     };
+    java = {
+      enable = true;
+      package = pkgs.jdk25;
+    };
     lutris = {
       enable = true;
     };
@@ -288,6 +347,34 @@
         set -g status-right-length 100
         set -g status-style padding=0
       '';
+    };
+    vicinae = {
+      enable = true;
+      # pop_to_root_on_close = true;
+      systemd = {
+        enable = true;
+        autoStart = true;
+      };
+      settings = {
+        keybinding = "emacs";
+        close_on_focus_loss = true;
+        launcher_window.opacity = 0.75;
+        providers = {
+          clipboard = {
+            preferences = {
+              eraseOnStartup = true;
+              monitoring = false;
+            };
+          };
+        };
+      };
+      extensions = with inputs.vicinae-extensions.packages.${pkgs.stdenv.hostPlatform.system}; [
+        # bluetooth
+        nix
+        mullvad
+        pulseaudio
+        wifi-commander
+      ];
     };
     tofi = {
       enable = true;
@@ -328,16 +415,70 @@
       '';
       oh-my-zsh = {
         enable = true;
-        plugins = ["aliases" "gitfast" "ssh" "colored-man-pages" "emoji" "git-auto-fetch" "cabal"];
+        plugins = [
+          "aliases"
+          "gitfast"
+          "ssh"
+          "colored-man-pages"
+          "emoji"
+          "git-auto-fetch"
+          "cabal"
+        ];
       };
     };
     zen-browser = {
       enable = true;
       profiles.default = {
         id = 0;
+        keyboardShortcuts = [
+          {
+            id = "zen-workspace-switch-1";
+            key = "1";
+            modifiers.control = true;
+          }
+          {
+            id = "zen-workspace-switch-2";
+            key = "2";
+            modifiers.control = true;
+          }
+          {
+            id = "zen-workspace-switch-3";
+            key = "3";
+            modifiers.control = true;
+          }
+          {
+            id = "zen-workspace-switch-4";
+            key = "4";
+            modifiers.control = true;
+          }
+          {
+            id = "zen-workspace-switch-5";
+            key = "5";
+            modifiers.control = true;
+          }
+        ];
         search = {
           force = true;
           default = "ddg";
+          engines = {
+            mynixos = {
+              name = "My NixOS";
+              urls = [
+                {
+                  template = "https://mynixos.com/search?q={searchTerms}";
+                  params = [
+                    {
+                      name = "query";
+                      value = "searchTerms";
+                    }
+                  ];
+                }
+              ];
+
+              icon = "${pkgs.nixos-icons}/share/icons/hicolor/scalable/apps/nix-snowflake.svg";
+              definedAliases = [ "@nx" ]; # Keep in mind that aliases defined here only work if they start with "@"
+            };
+          };
         };
       };
       policies.Preferences = {
