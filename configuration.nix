@@ -10,20 +10,32 @@
     ./nvidia.nix
   ];
   system.stateVersion = "25.05";
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
-  nixpkgs.config.allowUnfree = true;
+  nix.settings = {
+    experimental-features = [
+      "nix-command"
+      "flakes"
+    ];
 
-  programs.nix-ld = {
-    enable = true;
-    libraries = with pkgs; [
-      libxml2.out
-      libxtst
-      gcc-unwrapped
+    extra-substituters = [
+      "https://cache.numtide.com"
+      "https://cache.nixos-cuda.org"
+      "https://vicinae.cachix.org"
+    ];
+
+    extra-trusted-public-keys = [
+      "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+      "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+      "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
     ];
   };
+
+  services.ollama = {
+    enable = true;
+  };
+
+  nixpkgs.config.allowUnfree = true;
+
+  programs.openvpn3.enable = true;
   hardware.xpadneo.enable = true;
   hardware.xone.enable = true;
   services.udev.packages = [ pkgs.game-devices-udev-rules ];
@@ -75,18 +87,16 @@
       "suspend"
       "uinput"
       "wheel"
+      "seat"
     ];
   };
   services = {
+    gnome.sushi.enable = true;
     udisks2.enable = true;
     xserver = {
       enable = true;
       xkb.layout = "za";
       xkb.variant = "";
-    };
-    mysql = {
-      enable = true;
-      package = pkgs.mysql80;
     };
     gvfs.enable = true; # for removable media
     fwupd.enable = true; # firmware updates
@@ -99,13 +109,14 @@
       gparted
       xwayland-satellite
       gns3-gui
-      dynamips
       gns3-server
+      dynamips
+      vpcs
+      vista-fonts
       ubridge
       inetutils
     ];
   };
-
   security.wrappers.ubridge = {
     source = "${pkgs.ubridge}/bin/ubridge";
     capabilities = "cap_net_admin,cap_net_raw=ep";
@@ -117,7 +128,12 @@
   # Networking #
   networking = {
     hostName = "mukize";
-    networkmanager.enable = true;
+    networkmanager = {
+      enable = true;
+      plugins = with pkgs; [
+        networkmanager-openvpn
+      ];
+    };
     firewall = {
       allowedTCPPortRanges = [
         {
@@ -164,7 +180,7 @@
   };
   # ---------- #
 
-  # zsh #
+  ## zsh
   programs.zsh.enable = true;
   users.users.mukize.shell = pkgs.zsh;
   programs.nh = {
@@ -173,7 +189,7 @@
     clean.extraArgs = "--keep-since 4d --keep 3";
     flake = "/home/mukize/.dotfiles";
   };
-  # --- #
+  ## ---
 
   # Power Management #
   powerManagement.enable = true;
@@ -189,7 +205,14 @@
 
   # Bluetooth #
   hardware.bluetooth.enable = true;
+  hardware.bluetooth.powerOnBoot = true;
   services.blueman.enable = true;
+  hardware.bluetooth.settings = {
+    General = {
+      Experimental = true;
+      Enable = "Source,Sink,Media,Socket";
+    };
+  };
   # --------- #
 
   # Audio #
@@ -230,8 +253,6 @@
   services.xserver.desktopManager.xfce.enable = false;
   services.displayManager = {
     enable = true;
-    gdm.enable = true;
-    gdm.wayland = true;
     defaultSession = "hyprland-uwsm";
   };
   programs.hyprland = {
@@ -240,9 +261,15 @@
     xwayland.enable = true;
   };
   xdg.portal.enable = true;
+  xdg.portal.extraPortals = with pkgs; [ kdePackages.xdg-desktop-portal-kde ];
   security.pam.services.hyprlock = { };
   # -------- #
 
+  fonts.packages = with pkgs; [
+    noto-fonts
+    noto-fonts-cjk-sans
+    noto-fonts-cjk-serif
+  ];
   # Stylix #
   stylix = {
     enable = true;
@@ -265,7 +292,7 @@
   };
   # ------ #
 
-  # Gaming #
+  ## Gaming
   programs.steam = {
     enable = true;
     gamescopeSession.enable = true;
@@ -288,7 +315,28 @@
   };
   programs.gamescope = {
     enable = true;
-    capSysNice = true;
+    capSysNice = false; # was breaking steam
   };
-  # ------ #
+  ## ---
+
+  ## Nix GC
+  services.angrr.enable = true;
+  nix.gc.automatic = true;
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-direnv.enable = true;
+    silent = true;
+  };
+  programs.nix-ld = {
+    enable = false;
+    libraries = with pkgs; [
+
+      # Decent Sampler dirty fix
+      expat
+      alsa-lib
+
+    ];
+  };
+  ## ---
 }

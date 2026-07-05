@@ -2,13 +2,17 @@
   pkgs,
   zen-browser,
   pkgs-stable,
+  lib,
   ...
 }@inputs:
 rec {
-  imports = [ zen-browser.homeModules.twilight ];
+  imports = [
+    zen-browser.homeModules.twilight
+    # inputs.vicinae.homeManagerModules.default
+  ];
   fonts.fontconfig.enable = true;
   home = {
-    stateVersion = "25.05";
+    stateVersion = "26.05";
     username = "mukize";
     homeDirectory = "/home/mukize";
     sessionVariables = {
@@ -18,8 +22,8 @@ rec {
       NIXOS_OZONE_WL = "1";
       ELECTRON_OZONE_PLATFORM_HINT = "wayland";
       HYPRSHOT_DIR = "~/Pictures/Screenshots";
-      AQ_DRM_DEVICES = "/dev/dri/card2";
-      PATH = "$PATH:/home/mukize/.local/share/yabridge:/home/mukize/.pnpm";
+      PATH = "$PATH:/home/mukize/.local/share/yabridge:${home.homeDirectory}/.pnpm/bin";
+      BAR = "foo";
     }
     // (
       let
@@ -50,21 +54,29 @@ rec {
     };
     packages = with pkgs; ([
       ### Music
-      # decent-sampler
+      decent-sampler
       # guitarix
       calf
       pkgs-stable.giada
       reaper
+      bitwig-studio6
       drumgizmo
       x42-avldrums
       bankstown-lv2
+      inputs.llm-agents-pkgs.pi
+      inputs.llm-agents-pkgs.claude-code
       ### Applications
       gparted
       kdePackages.kdenlive
+      ollama
+      unzip
+      openvpn
       gimp
       hyprshot
       hyprpicker
       hyprpaper
+      mendeley
+      numlockx
       hyprsysteminfo
       mpv
       haruna
@@ -75,11 +87,13 @@ rec {
       slack
       discord
       qjackctl
-      # xournalpp
+      xournalpp
       pulseaudioFull
+      osu-lazer
       ### Files
       # TODO: check what I actually need for video thumbnails
       nautilus
+      tree-sitter
       gst_all_1.gst-plugins-good
       gst_all_1.gst-plugins-bad
       sushi
@@ -88,6 +102,7 @@ rec {
       kdePackages.kdegraphics-thumbnailers
       kdePackages.kdesdk-thumbnailers
       onlyoffice-desktopeditors
+      freeplane
       ### Wine
       protontricks
       # wineWowPackages.yabridge
@@ -95,7 +110,7 @@ rec {
       winetricks
       # yabridge
       # yabridgectl
-      bottles
+      # bottles
       ### CLI
       neovim
       exercism
@@ -172,6 +187,7 @@ rec {
   wayland.windowManager.hyprland.systemd.enable = false;
 
   services = {
+    ollama.enable = false;
     hyprpaper = {
       enable = true;
       package = pkgs.hyprpaper;
@@ -234,13 +250,14 @@ rec {
   programs = {
     opencode = {
       enable = true;
-      settings.theme = "custom";
-      themes.custom = ./config/opencode.json;
+      tui.theme = "system";
+      # tui.themes.custom = ./config/opencode.json;
     };
     sioyek = {
       enable = true;
       config = {
-        startup_commands = "toggle_custom_color";
+        startup_commands = lib.mkForce "";
+        # ruler_mode = "1";
       };
     };
     mangohud.enable = true;
@@ -261,11 +278,6 @@ rec {
         proc_filter_kernel = True
       '';
     };
-    direnv = {
-      enable = true;
-      enableZshIntegration = true;
-      nix-direnv.enable = true;
-    };
     eza = {
       enable = true;
       extraOptions = [ "--group-directories-first" ];
@@ -283,7 +295,8 @@ rec {
       settings = {
         gtk-tabs-location = "bottom";
         adw-toolbar-style = "flat";
-        shell-integration-features = "ssh-env";
+        background-blur = true;
+        shell-integration-features = "ssh-env,ssh-terminfo";
         gtk-wide-tabs = true;
         gtk-custom-css = [
           "~/.dotfiles/ghostty/style.css"
@@ -330,7 +343,7 @@ rec {
       package = pkgs.jdk25;
     };
     lutris = {
-      enable = true;
+      enable = false;
     };
     nix-index = {
       enable = false;
@@ -352,14 +365,18 @@ rec {
       enable = true;
       # pop_to_root_on_close = true;
       systemd = {
-        enable = true;
+        enable = false;
         autoStart = true;
       };
       settings = {
+        imports = [ "config.json" ];
         keybinding = "emacs";
         close_on_focus_loss = true;
         launcher_window.opacity = 0.75;
         providers = {
+          files = {
+            enabled = true;
+          };
           clipboard = {
             preferences = {
               eraseOnStartup = true;
