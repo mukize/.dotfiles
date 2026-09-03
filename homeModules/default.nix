@@ -162,7 +162,7 @@
         theme = "noctalia";
         gtk-wide-tabs = true;
         gtk-custom-css = [
-          ./.config/ghostty/tab-styling.css
+          "~/.dotfiles/.config/ghostty/tab-styling.css"
         ];
         keybind = [
           "performable:ctrl+c=copy_to_clipboard"

@@ -283,7 +283,7 @@
     enable = true;
     # autoEnable = false;
     base16Scheme = "${pkgs.base16-schemes}/share/themes/catppuccin-frappe.yaml";
-    image = ./wallpaper.png;
+    image = ../wallpaper.png;
     polarity = "dark";
     cursor = {
       package = pkgs.rose-pine-cursor;

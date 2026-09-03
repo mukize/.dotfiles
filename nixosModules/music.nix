@@ -1,5 +1,6 @@
-inputs: {
-  imports = [ inputs.musnix.nixosModules.musnix ];
+{ pkgs, musnix, ... }:
+{
+  imports = [ musnix.nixosModules.musnix ];
   musnix.enable = true;
   musnix.rtcqs.enable = true;
   users.users.mukize.extraGroups = [ "audio" ];
@@ -24,7 +25,7 @@ inputs: {
   #     VST_PATH = makePluginPath "vst";
   #     VST3_PATH = makePluginPath "vst3";
   #   };
-  environment.systemPackages = with inputs.pkgs; [
+  environment.systemPackages = with pkgs; [
     decent-sampler
     demucs-rs
     reaper

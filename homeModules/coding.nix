@@ -10,27 +10,32 @@
     "px" = "pnpx";
     "py" = "python3";
   };
-  home.packages = with llm-agents.packages.${pkgs.stdenv.hostPlatform.system}; [
-    fx
-    t3code-desktop
-    t3code
-    (chatgpt.override {
-      commandLineArgs = "--enable-features=UseOzonePlatform";
-    })
-    codex
-    opencode2
-    opencode
-    tree-sitter
-    neovim
-    tinymist
-    typst
-    gcc
-    cargo
-    nodejs_24
-    pnpm
-    python3
-    uv
-    lua-language-server
-    nil
-  ];
+  home.packages =
+    let
+      agents = llm-agents.packages.${pkgs.stdenv.hostPlatform.system};
+    in
+    with pkgs;
+    [
+      agents.fx
+      agents.t3code-desktop
+      agents.t3code
+      (agents.chatgpt.override {
+        commandLineArgs = "--enable-features=UseOzonePlatform";
+      })
+      agents.codex
+      agents.opencode2
+      agents.opencode
+      tree-sitter
+      neovim
+      tinymist
+      typst
+      gcc
+      cargo
+      nodejs_24
+      pnpm
+      python3
+      uv
+      lua-language-server
+      nil
+    ];
 }

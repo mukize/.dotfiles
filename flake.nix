@@ -1,8 +1,8 @@
 {
-  description = "My NixOS configuration";
+  description = "My Nix/NixOS Ecosystem";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-    nixpkgs-stable.url = "github:NixOS/nixpkgs/nixos-25.11";
+    import-tree.url = "github:vic/import-tree";
 
     home-manager.url = "github:nix-community/home-manager/master";
     home-manager.inputs.nixpkgs.follows = "nixpkgs";
@@ -10,17 +10,11 @@
     stylix.url = "github:danth/stylix";
     stylix.inputs.nixpkgs.follows = "nixpkgs";
 
-    vicinae-extensions = {
-      url = "github:vicinaehq/extensions";
-      # inputs.nixpkgs.follows = "nixpkgs";
-    };
     vicinae.url = "github:vicinaehq/vicinae";
+    vicinae-extensions.url = "github:vicinaehq/extensions";
 
     zen-browser.url = "github:0xc000022070/zen-browser-flake";
     zen-browser.inputs.nixpkgs.follows = "nixpkgs";
-
-    auto-cpufreq.url = "github:AdnanHodzic/auto-cpufreq";
-    auto-cpufreq.inputs.nixpkgs.follows = "nixpkgs";
 
     musnix.url = "github:musnix/musnix";
     musnix.inputs.nixpkgs.follows = "nixpkgs";
@@ -28,47 +22,58 @@
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
 
     llm-agents.url = "github:numtide/llm-agents.nix";
+
+    noctalia.url = "github:noctalia-dev/noctalia/cachix";
+    noctalia-greeter.url = "github:noctalia-dev/noctalia-greeter";
+    noctalia-greeter.inputs.nixpkgs.follows = "nixpkgs";
+
+    nix-index-database.url = "github:nix-community/nix-index-database";
+    nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
   };
-  outputs =
-    { nixpkgs, ... }@inputs:
-    let
+  outputs = inputs: {
+    nixosConfigurations.mukize = inputs.nixpkgs.lib.nixosSystem {
+      specialArgs = inputs;
       system = "x86_64-linux";
-      pkgs-stable = import inputs.nixpkgs-stable {
-        inherit system;
-        config.allowUnfree = true;
-      };
-      llm-agents-pkgs = inputs.llm-agents.packages.${system};
-      overlays = [
-        inputs.neovim-nightly-overlay.overlays.default
+      modules = [
+        (inputs.import-tree ./nixosModules)
+        inputs.noctalia-greeter.nixosModules.default
+        inputs.noctalia.nixosModules.default
+        inputs.stylix.nixosModules.stylix
+        inputs.musnix.nixosModules.musnix
+        inputs.nix-index-database.nixosModules.default
+        inputs.home-manager.nixosModules.home-manager
+        {
+          nixpkgs.overlays = [
+            inputs.neovim-nightly-overlay.overlays.default
+          ];
+          home-manager = {
+            useGlobalPkgs = true;
+            backupFileExtension = "backup";
+            useUserPackages = true;
+            enableLegacyProfileManagement = true;
+            extraSpecialArgs = inputs;
+            users.mukize.imports = [
+              (inputs.import-tree ./homeModules)
+              inputs.zen-browser.homeModules.twilight
+              inputs.vicinae.homeManagerModules.default
+            ];
+          };
+          nix.settings.extra-substituters = [
+            "https://cache.numtide.com"
+            "https://cache.nixos-cuda.org"
+            "https://vicinae.cachix.org"
+            "https://noctalia.cachix.org"
+            "https://nix-community.cachix.org"
+          ];
+          nix.settings.extra-trusted-public-keys = [
+            "niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="
+            "cache.nixos-cuda.org:74DUi4Ye579gUqzH4ziL9IyiJBlDpMRn9MBN8oNan9M="
+            "vicinae.cachix.org-1:1kDrfienkGHPYbkpNj1mWTr7Fm1+zcenzgTizIcI3oc="
+            "noctalia.cachix.org-1:pCOR47nnMEo5thcxNDtzWpOxNFQsBRglJzxWPp3dkU4="
+            "nix-community.cachix.org-1:mB9FSh9qf2dCimDSUo8Zy7bkq5CX+/rkCWyvRCYg3Fs="
+          ];
+        }
       ];
-    in
-    {
-      nixosConfigurations.mukize = nixpkgs.lib.nixosSystem {
-        specialArgs = {
-          inherit inputs;
-          inherit pkgs-stable;
-        };
-        modules = [
-          ./configuration.nix
-          inputs.stylix.nixosModules.stylix
-          inputs.home-manager.nixosModules.home-manager
-          inputs.auto-cpufreq.nixosModules.default
-          inputs.musnix.nixosModules.musnix
-          # inputs.vicinae.nixosModules.default
-          {
-            nixpkgs.overlays = overlays;
-            home-manager.useGlobalPkgs = true;
-            home-manager.backupFileExtension = "backup";
-            home-manager.useUserPackages = true;
-            home-manager.enableLegacyProfileManagement = true;
-            home-manager.extraSpecialArgs = {
-              inherit (inputs) zen-browser vicinae-extensions vicinae;
-              inherit pkgs-stable;
-              inherit llm-agents-pkgs;
-            };
-            home-manager.users.mukize = import ./home.nix;
-          }
-        ];
-      };
     };
+  };
 }
