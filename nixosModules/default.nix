@@ -21,23 +21,11 @@
   };
   services.gnome.gnome-keyring.enable = true;
 
-  programs.openvpn3.enable = true;
   hardware.xpadneo.enable = true;
   hardware.xone.enable = true;
   services.udev.packages = [ pkgs.game-devices-udev-rules ];
 
-  boot = {
-    plymouth.enable = true;
-    loader.systemd-boot.enable = true;
-    loader.efi.canTouchEfiVariables = true;
-    zswap = {
-      enable = true;
-      maxPoolPercent = 50;
-      shrinkerEnabled = true;
-      compressor = "zstd";
-      acceptThresholdPercent = 90;
-    };
-  };
+  boot.plymouth.enable = true;
   hardware.opentabletdriver.enable = true;
 
   time.timeZone = "Africa/Johannesburg";
@@ -49,6 +37,7 @@
       "adbusers"
       "gamemode"
       "gns3"
+      "dialout"
       "input"
       "kvm"
       "libvirtd"
@@ -108,67 +97,6 @@
     permissions = "u+rx,g+rx";
   };
 
-  # Networking #
-  networking = {
-    hostName = "mukize";
-    networkmanager = {
-      enable = true;
-      plugins = with pkgs; [
-        networkmanager-openvpn
-      ];
-    };
-    firewall = {
-      allowedTCPPortRanges = [
-        {
-          from = 54321;
-          to = 54324;
-        }
-        {
-          from = 8080;
-          to = 8082;
-        }
-      ];
-      allowedTCPPorts = [
-        9099
-        5001
-        57621
-        3773 # t3code
-      ];
-      allowedUDPPorts = [
-        9099
-        5001
-        5353
-      ];
-      allowedUDPPortRanges = [
-        {
-          from = 54321;
-          to = 54324;
-        }
-        {
-          from = 8080;
-          to = 8082;
-        }
-      ];
-    };
-    nat = {
-      enable = true;
-      externalInterface = "enp0s20f0u4";
-      internalInterfaces = [ "lo" ];
-    };
-  };
-  services.mullvad-vpn.enable = true;
-  services.miniupnpd = {
-    enable = false;
-    externalInterface = "enp0s20f0u4";
-    internalIPs = [ "lo" ];
-  };
-
-  programs.wireshark = {
-    enable = true;
-    package = pkgs.wireshark;
-  };
-  # ---------- #
-
   ## zsh
   programs.zsh.enable = true;
   users.users.mukize.shell = pkgs.zsh;
@@ -196,27 +124,6 @@
   };
   # --------- #
 
-  # Audio #
-  security.rtkit.enable = true;
-  services.playerctld.enable = true;
-  services.pipewire = {
-    enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    jack.enable = true;
-    pulse.enable = true;
-    wireplumber.enable = true;
-    extraConfig.pipewire = {
-
-    };
-    # extraConfig.pipewire."92-low-latency" = {
-    #   "context.properties" = {
-    #     "default.clock.rate" = 44100;
-    #     "default.clock.quantum" = 256;
-    #   };
-    # };
-  };
-
   # Graphics #
   hardware.graphics.enable = true;
   hardware.graphics.extraPackages = with pkgs; [
@@ -224,7 +131,6 @@
     intel-media-driver
     vpl-gpu-rt
   ];
-  services.xserver.desktopManager.xfce.enable = false;
   services.displayManager = {
     enable = true;
     defaultSession = "hyprland-uwsm";
@@ -240,14 +146,6 @@
       kdePackages.xdg-desktop-portal-kde
       xdg-desktop-portal-gtk
     ];
-    # config.hyprland = {
-    #   default = [
-    #     "hyprland"
-    #     "gtk"
-    #   ];
-    #
-    #   "org.freedesktop.impl.portal.FileChooser" = "kde";
-    # };
   };
   security.pam.services.hyprlock = { };
   # -------- #

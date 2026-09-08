@@ -31,6 +31,10 @@
     nix-index-database.inputs.nixpkgs.follows = "nixpkgs";
   };
   outputs = inputs: {
+    packages = builtins.mapAttrs (system: pkgs: {
+      tone3000-plugin = pkgs.callPackage ./packages/tone3000-plugin { };
+    }) inputs.nixpkgs.legacyPackages;
+
     nixosConfigurations.mukize = inputs.nixpkgs.lib.nixosSystem {
       specialArgs = inputs;
       system = "x86_64-linux";

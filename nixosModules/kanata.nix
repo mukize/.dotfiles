@@ -26,7 +26,6 @@
     keyboards = {
       internalKeyboard = {
         devices = [
-          #`ls /dev/input/by-path/`
           "/dev/input/by-path/platform-i8042-serio-0-event-kbd"
           "/dev/input/by-id/usb-Compx_2.4G_Wireless_Receiver-event-kbd"
         ];
