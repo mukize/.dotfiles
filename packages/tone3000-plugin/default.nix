@@ -17,6 +17,7 @@
   libgcc,
   libx11,
   fontconfig,
+  gst_all_1,
 }:
 
 let
@@ -36,7 +37,14 @@ let
 
        wrapProgram \
          "$out/libexec/webkit2gtk-4.1/WebKitNetworkProcess" \
-         --prefix GIO_EXTRA_MODULES : "${glib-networking}/lib/gio/modules"
+         --prefix GIO_EXTRA_MODULES : "${glib-networking}/lib/gio/modules" \
+        --prefix GST_PLUGIN_SYSTEM_PATH_1_0 : "${
+          lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" [
+            gst_all_1.gstreamer
+            gst_all_1.gst-plugins-base
+            gst_all_1.gst-plugins-good
+          ]
+        }"
     '';
   };
 in
