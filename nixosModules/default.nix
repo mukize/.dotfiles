@@ -6,15 +6,7 @@
     "nix-command"
     "flakes"
   ];
-  programs.noctalia = {
-    enable = true;
-    recommendedServices.enable = true;
-    systemd.enable = true;
-  };
-  programs.noctalia-greeter = {
-    enable = true;
-    settings.hide_logo = true;
-  };
+  programs.sysdig.enable = true;
   programs.nix-index-database = {
     enable = true;
     comma.enable = true;
@@ -195,14 +187,15 @@
   programs.nh = {
     enable = true;
     clean.enable = false;
-    clean.extraArgs = "--keep-since 4d --keep 3";
+    clean.extraArgs = "--keep-since 7d --keep 3 --no-gcroots --optimize";
     flake = "/home/mukize/.dotfiles";
   };
   services.angrr = {
     enable = true;
-    enableNixGcIntegration = true;
+    enableNixGcIntegration = false;
+    period = "14d";
   };
-  nix.gc.automatic = true;
+  nix.gc.automatic = false;
   programs.direnv = {
     enable = true;
     enableZshIntegration = true;
@@ -210,12 +203,8 @@
     silent = true;
   };
   programs.nix-ld = {
-    enable = true;
-    libraries = with pkgs; [
-      # Decent Sampler dirty fix
-      expat
-      alsa-lib
-    ];
+    enable = false;
+    libraries = with pkgs; [ ];
   };
   ## ---
 }
