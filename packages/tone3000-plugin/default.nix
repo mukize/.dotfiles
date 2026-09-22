@@ -3,16 +3,17 @@
   stdenv,
   fetchurl,
   autoPatchelfHook,
+  makeWrapper,
+  symlinkJoin,
+  nix-update-script,
 
   alsa-lib,
   gtk3,
+  wrapGAppsHook3,
   webkitgtk_4_1,
   libsoup_3,
   glib-networking,
   curlWithGnuTls,
-  makeWrapper,
-  nix-update-script,
-  symlinkJoin,
   freetype,
   libgcc,
   libx11,
@@ -25,7 +26,12 @@ let
   webkitgtkWrapped = symlinkJoin {
     name = webkitgtk_4_1.name;
     paths = [ webkitgtk_4_1 ];
-    nativeBuildInputs = [ makeWrapper ];
+    nativeBuildInputs = [ wrapGAppsHook3 ];
+    buildInputs = [
+      glib-networking
+      gst_all_1.gstreamer
+    ];
+    dontWrapGApps = true;
     postBuild = ''
       webkitLib="$out/lib/libwebkit2gtk-4.1.so.0"
       realWebkitLib="$(readlink -f "$webkitLib")"
@@ -35,16 +41,7 @@ let
 
       sed -i "s|${webkitgtk_4_1}|$out|g" "$webkitLib"
 
-       wrapProgram \
-         "$out/libexec/webkit2gtk-4.1/WebKitNetworkProcess" \
-         --prefix GIO_EXTRA_MODULES : "${glib-networking}/lib/gio/modules" \
-        --prefix GST_PLUGIN_SYSTEM_PATH_1_0 : "${
-          lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" [
-            gst_all_1.gstreamer
-            gst_all_1.gst-plugins-base
-            gst_all_1.gst-plugins-good
-          ]
-        }"
+      wrapGApp "$out/libexec/webkit2gtk-4.1/WebKitNetworkProcess"
     '';
   };
 in
