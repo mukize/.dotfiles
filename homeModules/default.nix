@@ -33,7 +33,6 @@
       pulseaudioFull
       ffmpeg
       haruna
-      gimp
       # Chat
       slack
       discord
@@ -117,7 +116,6 @@
   };
 
   programs = {
-    gh.enable = true;
     yt-dlp.enable = true;
     zathura.enable = true;
     sioyek = {
@@ -161,9 +159,9 @@
         shell-integration-features = "ssh-env,ssh-terminfo";
         theme = "noctalia";
         gtk-wide-tabs = true;
-        gtk-custom-css = [
-          "~/.dotfiles/.config/ghostty/tab-styling.css"
-        ];
+        # gtk-custom-css = [
+        #   "~/.dotfiles/.config/ghostty/tab-styling.css"
+        # ];
         keybind = [
           "performable:ctrl+c=copy_to_clipboard"
           "shift+alt+h=move_tab:-1"
@@ -172,10 +170,10 @@
           "performable:alt+k=goto_split:up"
           "performable:alt+j=goto_split:right"
           "performable:alt+l=goto_split:left"
-          "alt+l=next_tab"
-          "alt+h=previous_tab"
-          "ctrl+alt+l=next_tab"
-          "ctrl+alt+h=previous_tab"
+          # "alt+l=next_tab"
+          # "alt+h=previous_tab"
+          # "ctrl+alt+l=next_tab"
+          # "ctrl+alt+h=previous_tab"
         ];
       };
     };
@@ -199,22 +197,6 @@
             path = screenshot
             blur_passes = 2
         }
-      '';
-    };
-    java = {
-      enable = true;
-      package = pkgs.jdk25;
-    };
-    tmux = {
-      enable = true;
-      extraConfig = ''
-        set -g @catppuccin_flavor 'macchiato'
-        run ${pkgs.tmuxPlugins.catppuccin}/share/tmux-plugins/catppuccin/catppuccin.tmux
-
-        set -g status-left ""
-        set -g status-right '#[fg=#{@thm_crust},bg=#{@thm_teal}] session: #S '
-        set -g status-right-length 100
-        set -g status-style padding=0
       '';
     };
     vicinae = {
