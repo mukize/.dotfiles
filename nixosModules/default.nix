@@ -6,6 +6,10 @@
     "nix-command"
     "flakes"
   ];
+  nix.settings.trusted-users = [
+    "root"
+    "mukize"
+  ];
   programs.sysdig.enable = true;
   programs.nix-index-database = {
     enable = true;
@@ -72,6 +76,8 @@
       dracula-icon-theme
       gparted
       gpauth
+      gthumb
+      gimp
       gp-saml-gui
       gpclient
       xwayland-satellite
@@ -79,6 +85,7 @@
       inetutils
       nautilus
       bubblewrap
+      digikam
     ];
   };
   security.wrappers.ubridge = {
@@ -154,6 +161,8 @@
     ibm-plex
     maple-mono.NF
     inter
+    dm-sans
+    nerd-fonts.arimo
   ];
 
   ## Gaming
