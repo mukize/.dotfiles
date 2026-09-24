@@ -3,55 +3,24 @@
   stdenv,
   fetchurl,
   autoPatchelfHook,
-  makeWrapper,
-  symlinkJoin,
   nix-update-script,
 
   alsa-lib,
   gtk3,
-  wrapGAppsHook3,
-  webkitgtk_4_1,
   libsoup_3,
-  glib-networking,
   curlWithGnuTls,
   freetype,
   libgcc,
   libx11,
   fontconfig,
-  gst_all_1,
 }:
-
-let
-  # Resolves being unable to wrapGApp audio plugins
-  webkitgtkWrapped = symlinkJoin {
-    name = webkitgtk_4_1.name;
-    paths = [ webkitgtk_4_1 ];
-    nativeBuildInputs = [ wrapGAppsHook3 ];
-    buildInputs = [
-      glib-networking
-      gst_all_1.gstreamer
-    ];
-    dontWrapGApps = true;
-    postBuild = ''
-      webkitLib="$out/lib/libwebkit2gtk-4.1.so.0"
-      realWebkitLib="$(readlink -f "$webkitLib")"
-
-      rm "$webkitLib"
-      cp "$realWebkitLib" "$webkitLib"
-
-      sed -i "s|${webkitgtk_4_1}|$out|g" "$webkitLib"
-
-      wrapGApp "$out/libexec/webkit2gtk-4.1/WebKitNetworkProcess"
-    '';
-  };
-in
 stdenv.mkDerivation (finalAttrs: {
   pname = "tone3000-plugin";
-  version = "0.0.9";
+  version = "0.0.10";
 
   src = fetchurl {
-    url = "https://github.com/tone-3000/tone3000-plugin/releases/download/v${finalAttrs.version}/TONE3000-v${finalAttrs.version}-linux-x64.tar.gz";
-    hash = "sha256-PiP7Y5ZfMQg0CQwcrgNX6gsnnPwU1pgOO+sLe1pUtUY=";
+    url = "https://github.com/tone-3000/tone3000-plugin/releases/download/v${finalAttrs.version}-alpha/TONE3000-v${finalAttrs.version}-linux-x64.tar.gz";
+    hash = "sha256-lWjdbsFA5bBbuKpZO3ewPi+yu5Q9zWYiP1Md3cYyV0U=";
   };
 
   nativeBuildInputs = [
@@ -70,7 +39,6 @@ stdenv.mkDerivation (finalAttrs: {
   appendRunpaths = [
     (lib.makeLibraryPath [
       curlWithGnuTls.out
-      webkitgtkWrapped
       libsoup_3
       gtk3
     ])
